@@ -7,6 +7,7 @@ from shutil import copyfile, rmtree
 import numpy as np
 from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
+from pytube import YouTube
 from scipy.io import wavfile
 
 TEMP_FOLDER = "TEMP"
@@ -51,6 +52,13 @@ def deletePath(file_path):  # Dangerous! Watch out!
     except OSError:
         print("Deletion of the directory %s failed" % file_path)
         print(OSError)
+
+
+def download_file(url):
+    name = YouTube(url).streams.first().download()
+    newname = name.replace(' ', '_')
+    os.rename(name, newname)
+    return newname
 
 
 def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SPREADAGE: float,

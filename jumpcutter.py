@@ -1,16 +1,6 @@
 import argparse
-import os
-
-from pytube import YouTube
 
 import process as pro
-
-
-def download_file(url):
-    name = YouTube(url).streams.first().download()
-    newname = name.replace(' ', '_')
-    os.rename(name, newname)
-    return newname
 
 parser = argparse.ArgumentParser(
     description='Modifies a video file to play at different speeds when there is sound vs. silence.')
@@ -44,7 +34,7 @@ SILENT_THRESHOLD = args.silent_threshold
 FRAME_SPREADAGE = args.frame_margin
 NEW_SPEED = [args.silent_speed, args.sounded_speed]
 if args.url is not None:
-    INPUT_FILE = download_file(args.url)
+    INPUT_FILE = pro.download_file(args.url)
 else:
     INPUT_FILE = args.input_file
 URL = args.url
