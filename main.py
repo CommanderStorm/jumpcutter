@@ -1,6 +1,6 @@
 import glob
 
-import jumpcutter as jmp
+import process as pro
 
 inputPath = "/Footage/"
 
@@ -37,7 +37,7 @@ if txtFiles > 0:
               "\nFile #", filecounter)
         filecounter += 1
         INPUT_FILE = inputPath + i
-        jmp.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+        pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                     SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
 
 else:
@@ -45,5 +45,5 @@ else:
     print("('TUMSpeak_InputFiles' - Folder has %d .txt Files)" % txtFiles)
     text_to_be_converted = input("Please input the Text, you would like to have converted to TUMSpeak\n\t>")
     INPUT_FILE = inputPath + text_to_be_converted
-    jmp.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+    pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                 SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
