@@ -7,7 +7,7 @@ inputPath = os.path.dirname(__file__) + "/Footage"
 
 frameRate = 30
 SAMPLE_RATE = 44100
-SILENT_THRESHOLD = 0.0
+SILENT_THRESHOLD = 0.3
 FRAME_SPREADAGE = 3
 NEW_SPEED = [1.25, 7]
 INPUT_FILE = ""
