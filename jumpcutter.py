@@ -49,7 +49,8 @@ def createPath(s):
     try:
         os.mkdir(s)
     except OSError:
-        assert False, "Creation of the directory %s failed. (The TEMP folder may already exist. Delete or rename it, and try again.)"
+        assert False, "Creation of the directory %s failed. (The TEMP folder may already exist. Delete or rename it, " \
+                      "and try again.) "
 
 
 def deletePath(s):  # Dangerous! Watch out!
@@ -67,18 +68,22 @@ parser.add_argument('--url', type=str, help='A youtube url to download and proce
 parser.add_argument('--output_file', type=str, default="",
                     help="the output file. (optional. if not included, it'll just modify the input file name)")
 parser.add_argument('--silent_threshold', type=float, default=0.03,
-                    help="the volume amount that frames' audio needs to surpass to be consider \"sounded\". It ranges from 0 (silence) to 1 (max volume)")
+                    help="the volume amount that frames' audio needs to surpass to be consider \"sounded\". It ranges "
+                         "from 0 (silence) to 1 (max volume)")
 parser.add_argument('--sounded_speed', type=float, default=1.00,
                     help="the speed that sounded (spoken) frames should be played at. Typically 1.")
 parser.add_argument('--silent_speed', type=float, default=5.00,
                     help="the speed that silent frames should be played at. 999999 for jumpcutting.")
 parser.add_argument('--frame_margin', type=float, default=1,
-                    help="some silent frames adjacent to sounded frames are included to provide context. How many frames on either the side of speech should be included? That's this variable.")
+                    help="some silent frames adjacent to sounded frames are included to provide context. How many "
+                         "frames on either the side of speech should be included? That's this variable.")
 parser.add_argument('--sample_rate', type=float, default=44100, help="sample rate of the input and output videos")
 parser.add_argument('--frame_rate', type=float, default=30,
-                    help="frame rate of the input and output videos. optional... I try to find it out myself, but it doesn't always work.")
+                    help="frame rate of the input and output videos. optional... I try to find it out myself, "
+                         "but it doesn't always work.")
 parser.add_argument('--frame_quality', type=int, default=3,
-                    help="quality of frames to be extracted from input video. 1 is highest, 31 is lowest, 3 is the default.")
+                    help="quality of frames to be extracted from input video. 1 is highest, 31 is lowest, 3 is the "
+                         "default.")
 
 args = parser.parse_args()
 
@@ -103,7 +108,9 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
     global TEMP_FOLDER
     if len(OUTPUT_FILE) < 1:
         OUTPUT_FILE = inputToOutputFilename(INPUT_FILE)
-    AUDIO_FADE_ENVELOPE_SIZE = 400  # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
+
+    # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
+    AUDIO_FADE_ENVELOPE_SIZE = 400
     createPath(TEMP_FOLDER)
     command = "ffmpeg -i " + INPUT_FILE + " -qscale:v " + str(
         FRAME_QUALITY) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
@@ -126,8 +133,9 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
         if m is not None:
             frameRate = float(m.group(1))
     samplesPerFrame = sampleRate / frameRate
-    audioFrameCount = int(math.ceil(audioSampleCount / samplesPerFrame))
+    audioFrameCount: int = int(math.ceil(audioSampleCount / samplesPerFrame))
     hasLoudAudio = np.zeros(audioFrameCount)
+    i: int
     for i in range(audioFrameCount):
         start = int(i * samplesPerFrame)
         end = min(int((i + 1) * samplesPerFrame), audioSampleCount)
@@ -136,7 +144,7 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
         if maxchunksVolume >= SILENT_THRESHOLD:
             hasLoudAudio[i] = 1
     chunks = [[0, 0, 0]]
-    shouldIncludeFrame = np.zeros((audioFrameCount))
+    shouldIncludeFrame = np.zeros(audioFrameCount)
     for i in range(audioFrameCount):
         start = int(max(0, i - FRAME_SPREADAGE))
         end = int(min(audioFrameCount, i + 1 + FRAME_SPREADAGE))
