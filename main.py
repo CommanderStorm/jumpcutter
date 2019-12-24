@@ -7,20 +7,20 @@ inputPath = os.path.dirname(__file__) + "/Footage"
 
 frameRate = 30
 SAMPLE_RATE = 44100
-SILENT_THRESHOLD = 0.3
+SILENT_THRESHOLD = 0.1
 FRAME_SPREADAGE = 3
-NEW_SPEED = [1.25, 7]
+NEW_SPEED = [100_000_000, 1.25]
 INPUT_FILE = ""
-FRAME_QUALITY = 2
+FRAME_QUALITY = 3
 OUTPUT_FILE = ""
+number_of_files: int = 0
 
 # noinspection PyBroadException
 try:
-    number_of_files: int = len(glob.glob1(inputPath, "*.mp4"))
+    number_of_files = len(glob.glob1(inputPath, "*.mp4"))
     print(number_of_files)
 except:
     print("something went wrong when trying to access the '%s' - Folder" % inputPath)
-    number_of_files: int = 0
 
 if number_of_files > 0:
     print("\nInput-Source is the '%s' - Folder" % inputPath)
@@ -36,7 +36,6 @@ if number_of_files > 0:
         INPUT_FILE = inputPath + "/" + i
         pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                     SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
-
 else:
     print("Input-Source is the commandline")
     url = input("Please input the URL (for example 'https://www.youtube.com/watch?v=DQ8orIurGxw')\n\t>")
