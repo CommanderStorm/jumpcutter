@@ -6,7 +6,7 @@ inputPath = "/Footage/"
 
 
 def number_of_txt_in_input() -> int:
-    return len(glob.glob1(inputPath, "*.mp4"))
+    return len(glob.glob1(inputPath, ".mp4"))
 
 
 frameRate = 30
@@ -22,28 +22,27 @@ OUTPUT_FILE = ""
 try:
     txtFiles: int = number_of_txt_in_input()
 except:
-    print("something went wrong when trying to access the 'TUMSpeak_InputFiles' - Folder")
+    print("something went wrong when trying to access the '%s' - Folder" % inputPath)
     txtFiles: int = 0
 
 if txtFiles > 0:
     print("\nInput-Source is the '%s' - Folder" % inputPath)
     if txtFiles > 1:
-        print("('TUMSpeak_InputFiles' - Folder has %d .mp4 Files)" % txtFiles)
+        print("('%s' - Folder has %d .mp4 Files)" % (inputPath, txtFiles))
     else:
-        print("('TUMSpeak_InputFiles' - Folder has 1 .mp4 File)")
-    filecounter = 1
-    for i in glob.glob1(inputPath, "*.mp4"):
+        print("('%s' - Folder has 1 .mp4 File)" % inputPath)
+    filecount = 1
+    for i in glob.glob1(inputPath, ".mp4"):
         print("\n-----------------------------------------"
-              "\nFile #", filecounter)
-        filecounter += 1
+              "\nFile #", filecount)
+        filecount += 1
         INPUT_FILE = inputPath + i
         pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                     SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
 
 else:
     print("Input-Source is the commandline")
-    print("('TUMSpeak_InputFiles' - Folder has %d .txt Files)" % txtFiles)
-    text_to_be_converted = input("Please input the Text, you would like to have converted to TUMSpeak\n\t>")
-    INPUT_FILE = inputPath + text_to_be_converted
+    url = input("Please input the URL (for example 'example.mp4')\n\t>")
+    INPUT_FILE = pro.download_file(url)
     pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                 SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
