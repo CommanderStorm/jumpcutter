@@ -14,50 +14,51 @@ from scipy.io import wavfile
 TEMP_FOLDER = "TEMP"
 
 
-def downloadFile(url):
+def download_file(url):
     name = YouTube(url).streams.first().download()
     newname = name.replace(' ', '_')
     os.rename(name, newname)
     return newname
 
 
-def getMaxVolume(s):
-    maxv = float(np.max(s))
-    minv = float(np.min(s))
-    return max(maxv, -minv)
+def get_max_volume(s):
+    max_volume = float(np.max(s))
+    min_volume = float(np.min(s))
+    return max(max_volume, -min_volume)
 
 
-def copyFrame(inputFrame, outputFrame):
-    src = TEMP_FOLDER + "/frame{:06d}".format(inputFrame + 1) + ".jpg"
-    dst = TEMP_FOLDER + "/newFrame{:06d}".format(outputFrame + 1) + ".jpg"
+def copy_frame(input_frame, output_frame):
+    src = TEMP_FOLDER + "/frame{:06d}".format(input_frame + 1) + ".jpg"
+    dst = TEMP_FOLDER + "/newFrame{:06d}".format(output_frame + 1) + ".jpg"
     if not os.path.isfile(src):
         return False
     copyfile(src, dst)
-    if outputFrame % 20 == 19:
-        print(str(outputFrame + 1) + " time-altered frames saved.")
+    if output_frame % 20 == 19:
+        print(str(output_frame + 1) + " time-altered frames saved.")
     return True
 
 
-def inputToOutputFilename(filename):
+def input_to_output_filename(filename):
     dotIndex = filename.rfind(".")
     return filename[:dotIndex] + "_ALTERED" + filename[dotIndex:]
 
 
-def createPath(s):
-    # assert (not os.path.exists(s)), "The filepath "+s+" already exists. Don't want to overwrite it. Aborting."
+def create_path(file_path):
+    # assert (not os.path.exists(file_path)), "The filepath "+file_path+" already exists. Don't want to overwrite it.
+    # Aborting."
 
     try:
-        os.mkdir(s)
+        os.mkdir(file_path)
     except OSError:
         assert False, "Creation of the directory %s failed. (The TEMP folder may already exist. Delete or rename it, " \
                       "and try again.) "
 
 
-def deletePath(s):  # Dangerous! Watch out!
+def deletePath(file_path):  # Dangerous! Watch out!
     try:
-        rmtree(s, ignore_errors=False)
+        rmtree(file_path, ignore_errors=False)
     except OSError:
-        print("Deletion of the directory %s failed" % s)
+        print("Deletion of the directory %s failed" % file_path)
         print(OSError)
 
 
@@ -93,10 +94,9 @@ SILENT_THRESHOLD = args.silent_threshold
 FRAME_SPREADAGE = args.frame_margin
 NEW_SPEED = [args.silent_speed, args.sounded_speed]
 if args.url is not None:
-    INPUT_FILE = downloadFile(args.url)
+    INPUT_FILE = download_file(args.url)
 else:
     INPUT_FILE = args.input_file
-assert INPUT_FILE is not None, "why u put no input file, that dum"
 URL = args.url
 FRAME_QUALITY = args.frame_quality
 
@@ -106,12 +106,13 @@ OUTPUT_FILE = args.output_file
 def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SPREADAGE: float,
             SAMPLE_RATE: float, frameRate: float, FRAME_QUALITY: int):
     global TEMP_FOLDER
+    assert INPUT_FILE is not None, "why u put no input file, that dum"
     if len(OUTPUT_FILE) < 1:
-        OUTPUT_FILE = inputToOutputFilename(INPUT_FILE)
+        OUTPUT_FILE = input_to_output_filename(INPUT_FILE)
 
     # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
     AUDIO_FADE_ENVELOPE_SIZE = 400
-    createPath(TEMP_FOLDER)
+    create_path(TEMP_FOLDER)
     command = "ffmpeg -i " + INPUT_FILE + " -qscale:v " + str(
         FRAME_QUALITY) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
     subprocess.call(command, shell=True)
@@ -123,7 +124,7 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
     subprocess.call(command, shell=True, stdout=f)
     sampleRate, audioData = wavfile.read(TEMP_FOLDER + "/audio.wav")
     audioSampleCount = audioData.shape[0]
-    maxAudioVolume = getMaxVolume(audioData)
+    maxAudioVolume = get_max_volume(audioData)
     f = open(TEMP_FOLDER + "/params.txt", 'r+')
     pre_params = f.read()
     f.close()
@@ -140,7 +141,7 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
         start = int(i * samplesPerFrame)
         end = min(int((i + 1) * samplesPerFrame), audioSampleCount)
         audiochunks = audioData[start:end]
-        maxchunksVolume = float(getMaxVolume(audiochunks)) / maxAudioVolume
+        maxchunksVolume = float(get_max_volume(audiochunks)) / maxAudioVolume
         if maxchunksVolume >= SILENT_THRESHOLD:
             hasLoudAudio[i] = 1
     chunks = [[0, 0, 0]]
@@ -187,18 +188,18 @@ def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SP
         endOutputFrame = int(math.ceil(endPointer / samplesPerFrame))
         for outputFrame in range(startOutputFrame, endOutputFrame):
             inputFrame = int(chunk[0] + NEW_SPEED[int(chunk[2])] * (outputFrame - startOutputFrame))
-            didItWork = copyFrame(inputFrame, outputFrame)
+            didItWork = copy_frame(inputFrame, outputFrame)
             if didItWork:
                 lastExistingFrame = inputFrame
             else:
-                copyFrame(lastExistingFrame, outputFrame)
+                copy_frame(lastExistingFrame, outputFrame)
 
         outputPointer = endPointer
     wavfile.write(TEMP_FOLDER + "/audioNew.wav", SAMPLE_RATE, outputAudioData)
     '''
     outputFrame = math.ceil(outputPointer/samplesPerFrame)
     for endGap in range(outputFrame,audioFrameCount):
-        copyFrame(int(audioSampleCount/samplesPerFrame)-1,endGap)
+        copy_frame(int(audioSampleCount/samplesPerFrame)-1,endGap)
     '''
     command = "ffmpeg -framerate " + str(
         frameRate) + " -i " + TEMP_FOLDER + "/newFrame%06d.jpg -i " + TEMP_FOLDER + "/audioNew.wav -strict -2 " + OUTPUT_FILE
