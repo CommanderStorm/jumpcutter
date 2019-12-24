@@ -104,7 +104,7 @@ OUTPUT_FILE = args.output_file
 
 
 def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SPREADAGE: float,
-            SAMPLE_RATE: float, frameRate: float, FRAME_QUALITY: int):
+            SAMPLE_RATE: float, frameRate: float, FRAME_QUALITY: int, INPUT_FILE: str):
     global TEMP_FOLDER
     assert INPUT_FILE is not None, "why u put no input file, that dum"
     if len(OUTPUT_FILE) < 1:

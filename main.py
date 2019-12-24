@@ -38,7 +38,7 @@ if txtFiles > 0:
         filecounter += 1
         INPUT_FILE = inputPath + i
         jmp.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-                    SAMPLE_RATE, frameRate, FRAME_QUALITY)
+                    SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
 
 else:
     print("Input-Source is the commandline")
@@ -46,4 +46,4 @@ else:
     text_to_be_converted = input("Please input the Text, you would like to have converted to TUMSpeak\n\t>")
     INPUT_FILE = inputPath + text_to_be_converted
     jmp.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-                SAMPLE_RATE, frameRate, FRAME_QUALITY)
+                SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
