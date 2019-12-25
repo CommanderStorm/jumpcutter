@@ -18,7 +18,6 @@ number_of_files: int = 0
 # noinspection PyBroadException
 try:
     number_of_files = len(glob.glob1(inputPath, "*.mp4"))
-    print(number_of_files)
 except:
     print("something went wrong when trying to access the '%s' - Folder" % inputPath)
 
