@@ -5,6 +5,7 @@ __pycache__/
 ffmpeg.exe
 
 Footage
+TEMP
 
 # C extensions
 *.so
