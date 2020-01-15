@@ -5,11 +5,16 @@ import process as pro
 
 inputPath = os.path.dirname(__file__) + "/Footage"
 
-frameRate = 30
+frameRate = 25
 SAMPLE_RATE = 44100
-SILENT_THRESHOLD = 0.1
+# SILENT_THRESHOLD = 0.02
+# FRAME_SPREADAGE = 1
+# NEW_SPEED = [999_999, 1.2]
+# NEW_SPEED = [1, 999_999]
+SILENT_THRESHOLD = 0.02
 FRAME_SPREADAGE = 3
 NEW_SPEED = [999_999, 1.2]
+
 INPUT_FILE = ""
 FRAME_QUALITY = 3
 OUTPUT_FILE = ""
