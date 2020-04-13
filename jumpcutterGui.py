@@ -1,66 +1,60 @@
 import json
 import os
 import sys
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 GUI_SETTINGS_FILENAME = "gui_settings.json"
 
-if os.name == 'nt':
-    import ctypes
-    from ctypes import windll, wintypes
-    from uuid import UUID
 
+# jea.. Windows.. I guess
+def get_download_folder():
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import windll, wintypes
+        from uuid import UUID
 
-    # ctypes GUID copied from MSDN sample code
-    class GUID(ctypes.Structure):
-        _fields_ = [
-            ("Data1", wintypes.DWORD),
-            ("Data2", wintypes.WORD),
-            ("Data3", wintypes.WORD),
-            ("Data4", wintypes.BYTE * 8)
+        # ctypes GUID copied from MSDN sample code
+        class GUID(ctypes.Structure):
+            _fields_ = [
+                ("Data1", wintypes.DWORD),
+                ("Data2", wintypes.WORD),
+                ("Data3", wintypes.WORD),
+                ("Data4", wintypes.BYTE * 8)
+            ]
+
+            def __init__(self, uuidstr):
+                uuid = UUID(uuidstr)
+                ctypes.Structure.__init__(self)
+                self.Data1, self.Data2, self.Data3, self.Data4[0], self.Data4[1], rest = uuid.fields
+                for i in range(2, 8):
+                    self.Data4[i] = rest >> (8 - i - 1) * 8 & 0xff
+
+        sh_get_known_folder_path = windll.shell32.SHGetKnownFolderPath
+        sh_get_known_folder_path.argtypes = [
+            ctypes.POINTER(GUID), wintypes.DWORD,
+            wintypes.HANDLE, ctypes.POINTER(ctypes.c_wchar_p)
         ]
 
-        def __init__(self, uuidstr):
-            uuid = UUID(uuidstr)
-            ctypes.Structure.__init__(self)
-            self.Data1, self.Data2, self.Data3, \
-            self.Data4[0], self.Data4[1], rest = uuid.fields
-            for i in range(2, 8):
-                self.Data4[i] = rest >> (8 - i - 1) * 8 & 0xff
+        def _get_known_folder_path(uuidstr):
+            pathptr = ctypes.c_wchar_p()
+            guid = GUID(uuidstr)
+            if sh_get_known_folder_path(ctypes.byref(guid), 0, 0, ctypes.byref(pathptr)):
+                raise ctypes.WinError()
+            return pathptr.value
 
-
-    SHGetKnownFolderPath = windll.shell32.SHGetKnownFolderPath
-    SHGetKnownFolderPath.argtypes = [
-        ctypes.POINTER(GUID), wintypes.DWORD,
-        wintypes.HANDLE, ctypes.POINTER(ctypes.c_wchar_p)
-    ]
-
-
-    def _get_known_folder_path(uuidstr):
-        pathptr = ctypes.c_wchar_p()
-        guid = GUID(uuidstr)
-        if SHGetKnownFolderPath(ctypes.byref(guid), 0, 0, ctypes.byref(pathptr)):
-            raise ctypes.WinError()
-        return pathptr.value
-
-
-    FOLDERID_Download = '{374DE290-123F-4565-9164-39C4925E467B}'
-
-
-    def get_download_folder():
-        return _get_known_folder_path(FOLDERID_Download)
-else:
-    def get_download_folder():
+        folderid_download = '{374DE290-123F-4565-9164-39C4925E467B}'
+        return _get_known_folder_path(folderid_download)
+    else:
         home = os.path.expanduser("~")
         return os.path.join(home, "Downloads")
 
 
 class UiJumpcutter(object):
-
-    def __init__(self, Jumpcutter):
-        Jumpcutter.setObjectName("Jumpcutter")
-        Jumpcutter.resize(790, 600)
-        self.centralwidget = QtWidgets.QWidget(Jumpcutter)
+    def __init__(self, jumpcutter):
+        jumpcutter.setObjectName("jumpcutter")
+        jumpcutter.resize(790, 600)
+        self.centralwidget = QtWidgets.QWidget(jumpcutter)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(self.centralwidget)
         self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(10, 0, 761, 571))
@@ -292,8 +286,8 @@ class UiJumpcutter(object):
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_2.setObjectName("line_2")
         self.verticalLayout_3.addWidget(self.line_2)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem)
+        spacer_item = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacer_item)
         self.runButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_2)
         self.runButton.setEnabled(True)
         font = QtGui.QFont()
@@ -307,65 +301,122 @@ class UiJumpcutter(object):
         self.runButton.setObjectName("runButton")
         self.verticalLayout_3.addWidget(self.runButton)
         self.horizontalLayout_2.addLayout(self.verticalLayout_3)
-        Jumpcutter.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(Jumpcutter)
+        jumpcutter.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(jumpcutter)
         self.statusbar.setObjectName("statusbar")
-        Jumpcutter.setStatusBar(self.statusbar)
+        jumpcutter.setStatusBar(self.statusbar)
 
-        self.retranslateUi(Jumpcutter)
-        QtCore.QMetaObject.connectSlotsByName(Jumpcutter)
+        self.retranslateUi(jumpcutter)
+        QtCore.QMetaObject.connectSlotsByName(jumpcutter)
 
     def retranslateUi(self, Jumpcutter):
         _translate = QtCore.QCoreApplication.translate
-        Jumpcutter.setWindowTitle(_translate("Jumpcutter", "Jumpcutter"))
-        self.sourceSelectioncomboBox.setItemText(0, _translate("Jumpcutter", "Download Video from Youtube"))
-        self.sourceSelectioncomboBox.setItemText(1, _translate("Jumpcutter", "Convert all .mp4\'s in a whole Folder"))
-        self.sourceSelectioncomboBox.setItemText(2, _translate("Jumpcutter", "Convert a single .mp4 File"))
-        self.label.setToolTip(_translate("Jumpcutter",
-                                         "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI/URL depending on what is selected above</span></p></body></html>"))
-        self.label.setText(_translate("Jumpcutter", "Source:"))
-        self.sourceLineEdit.setToolTip(_translate("Jumpcutter",
-                                                  "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI/URL depending on what is selected above</span></p></body></html>"))
-        self.label_3.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI</span></p></body></html>"))
-        self.label_3.setText(_translate("Jumpcutter", "Destination:"))
-        self.destinationLineEdit.setToolTip(_translate("Jumpcutter",
-                                                       "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI</span></p></body></html>"))
-        self.label_9.setText(_translate("Jumpcutter", "Detailed Settings"))
-        self.label_4.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">The volume amount that frames\' audio needs to surpass to be consider &quot;sounded&quot;.</span></p><p><span style=\" font-size:10pt;\">It ranges from 0 (silence) to 1 (max volume)</span></p></body></html>"))
-        self.label_4.setText(_translate("Jumpcutter", "Slilent Threshold"))
-        self.silentThresholdLineEdit.setToolTip(_translate("Jumpcutter",
-                                                           "<html><head/><body><p><span style=\" font-size:10pt;\">The volume amount that frames\' audio needs to surpass to be consider &quot;sounded&quot;.</span></p><p><span style=\" font-size:10pt;\">It ranges from 0 (silence) to 1 (max volume)</span></p></body></html>"))
-        self.label_5.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">The speed that silent frames should be played at.</span></p><p><span style=\" font-size:10pt;\">999999 for jumpcutting.</span></p></body></html>"))
-        self.label_5.setText(_translate("Jumpcutter", "Silent Speed"))
-        self.silentSpeedLineEdit.setToolTip(_translate("Jumpcutter",
-                                                       "<html><head/><body><p><span style=\" font-size:10pt;\">The speed that silent frames should be played at.</span></p><p><span style=\" font-size:10pt;\">999999 for jumpcutting.</span></p></body></html>"))
-        self.label_2.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">the speed that sounded (spoken) frames should be played at.</span></p><p><span style=\" font-size:10pt;\">Typically 1 to 1.5</span></p></body></html>"))
-        self.label_2.setText(_translate("Jumpcutter", "Sounded Speed"))
-        self.soundedSpeedLineEdit.setToolTip(_translate("Jumpcutter",
-                                                        "<html><head/><body><p><span style=\" font-size:10pt;\">the speed that sounded (spoken) frames should be played at.</span></p><p><span style=\" font-size:10pt;\">Typically 1 to 1.5</span></p></body></html>"))
-        self.label_6.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">Sample rate of the input and output videos</span></p></body></html>"))
-        self.label_6.setText(_translate("Jumpcutter", "Sample Rate"))
-        self.sampleRateLineEdit.setToolTip(_translate("Jumpcutter",
-                                                      "<html><head/><body><p><span style=\" font-size:10pt;\">Sample rate of the input and output videos</span></p></body></html>"))
-        self.frameRateLineEdit.setToolTip(_translate("Jumpcutter",
-                                                     "<html><head/><body><p><span style=\" font-size:10pt;\">Frame rate of the input and output videos. optional... I try to find it out myself,</span></p><p><span style=\" font-size:10pt;\">But it doesn\'t always work.</span></p></body></html>"))
-        self.label_8.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, </span></p><p><span style=\" font-size:10pt;\">3 is the default.</span></p></body></html>"))
-        self.label_8.setText(_translate("Jumpcutter", "Frame Quality"))
-        self.frameQualityhorizontalSlider.setToolTip(_translate("Jumpcutter",
-                                                                "<html><head/><body><p><span style=\" font-size:10pt;\">Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, </span></p><p><span style=\" font-size:10pt;\">3 is the default.</span></p></body></html>"))
-        self.label_7.setToolTip(_translate("Jumpcutter",
-                                           "<html><head/><body><p><span style=\" font-size:10pt;\">Frame rate of the input and output videos. optional... I try to find it out myself,</span></p><p><span style=\" font-size:10pt;\">But it doesn\'t always work.</span></p></body></html>"))
-        self.label_7.setText(_translate("Jumpcutter", "Frame Rate"))
-        self.label_10.setText(_translate("Jumpcutter", "Frame Margin"))
-        self.runButton.setToolTip(_translate("Jumpcutter",
-                                             "<html><head/><body><p><span style=\" font-size:10pt;\">Modifies a video file to play at different speeds when there is sound vs. silence.<br/><br/></span><span style=\" font-size:12pt; font-weight:600;\">Expected Runtime is 0.5 to 2x the original playback speed<br/>Long videos may require python 64bit due to memory requirenments</span></p></body></html>"))
-        self.runButton.setText(_translate("Jumpcutter", "Run!"))
+        Jumpcutter.setWindowTitle(_translate("jumpcutter", "jumpcutter"))
+        self.sourceSelectioncomboBox.setItemText(0, _translate("jumpcutter", "Download Video from Youtube"))
+        self.sourceSelectioncomboBox.setItemText(1, _translate("jumpcutter", "Convert all .mp4\'s in a whole Folder"))
+        self.sourceSelectioncomboBox.setItemText(2, _translate("jumpcutter", "Convert a single .mp4 File"))
+        self.label.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI/URL depending on what "
+                       "is selected above</span></p></body></html>"))
+        self.label.setText(_translate("jumpcutter", "Source:"))
+        self.sourceLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full URI/URL depending on what "
+                       "is selected above</span></p></body></html>"))
+        self.label_3.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full "
+                       "URI</span></p></body></html>"))
+        self.label_3.setText(_translate("jumpcutter", "Destination:"))
+        self.destinationLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Format: Full "
+                       "URI</span></p></body></html>"))
+        self.label_9.setText(_translate("jumpcutter", "Detailed Settings"))
+        self.label_4.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">The volume amount that frames\' audio "
+                       "needs to surpass to be consider &quot;sounded&quot;.</span></p><p><span style=\" "
+                       "font-size:10pt;\">It ranges from 0 (silence) to 1 (max volume)</span></p></body></html>"))
+        self.label_4.setText(_translate("jumpcutter", "Slilent Threshold"))
+        self.silentThresholdLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">The volume amount that frames\' audio "
+                       "needs to surpass to be consider &quot;sounded&quot;.</span></p><p><span style=\" "
+                       "font-size:10pt;\">It ranges from 0 (silence) to 1 (max volume)</span></p></body></html>"))
+        self.label_5.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">The speed that silent frames should be "
+                       "played at.</span></p><p><span style=\" font-size:10pt;\">999999 for "
+                       "jumpcutting.</span></p></body></html>"))
+        self.label_5.setText(_translate("jumpcutter", "Silent Speed"))
+        self.silentSpeedLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">The speed that silent frames should be "
+                       "played at.</span></p><p><span style=\" font-size:10pt;\">999999 for "
+                       "jumpcutting.</span></p></body></html>"))
+        self.label_2.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">the speed that sounded (spoken) frames "
+                       "should be played at.</span></p><p><span style=\" font-size:10pt;\">Typically 1 to "
+                       "1.5</span></p></body></html>"))
+        self.label_2.setText(_translate("jumpcutter", "Sounded Speed"))
+        self.soundedSpeedLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">the speed that sounded (spoken) frames "
+                       "should be played at.</span></p><p><span style=\" font-size:10pt;\">Typically 1 to "
+                       "1.5</span></p></body></html>"))
+        self.label_6.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Sample rate of the input and output "
+                       "videos</span></p></body></html>"))
+        self.label_6.setText(_translate("jumpcutter", "Sample Rate"))
+        self.sampleRateLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Sample rate of the input and output "
+                       "videos</span></p></body></html>"))
+        self.frameRateLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Frame rate of the input and output "
+                       "videos. optional... I try to find it out myself,</span></p><p><span style=\" "
+                       "font-size:10pt;\">But it doesn\'t always work.</span></p></body></html>"))
+        self.label_8.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Quality of frames to be extracted from "
+                       "input video. 1 is highest, 31 is lowest, </span></p><p><span style=\" font-size:10pt;\">3 is "
+                       "the default.</span></p></body></html>"))
+        self.label_8.setText(
+            _translate("jumpcutter", "Frame Quality"))
+        self.frameQualityhorizontalSlider.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Quality of frames to be extracted from "
+                       "input video. 1 is highest, 31 is lowest, </span></p><p><span style=\" font-size:10pt;\">3 is "
+                       "the default.</span></p></body></html>"))
+        self.label_7.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Frame rate of the input and output "
+                       "videos. optional... I try to find it out myself,</span></p><p><span style=\" "
+                       "font-size:10pt;\">But it doesn\'t always work.</span></p></body></html>"))
+        self.label_7.setText(
+            _translate("jumpcutter", "Frame Rate"))
+        self.label_10.setText(
+            _translate("jumpcutter", "Frame Margin"))
+        self.frameMarginLineEdit.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">some silent frames adjacent to sounded "
+                       "frames are included to provide context.</span></p><p><span style=\" font-size:10pt;\"> How "
+                       "many frames on either the side of speech should be included? That's this "
+                       "variable.</span></p></body></html>"))
+        self.runButton.setToolTip(
+            _translate("jumpcutter",
+                       "<html><head/><body><p><span style=\" font-size:10pt;\">Modifies a video file to play at "
+                       "different speeds when there is sound vs. silence.<br/><br/></span><span style=\" "
+                       "font-size:12pt; font-weight:600;\">Expected Runtime is 0.5 to 2x the original playback "
+                       "speed<br/>Long videos may require python 64bit due to memory "
+                       "requirenments</span></p></body></html>"))
+        self.runButton.setText(
+            _translate("jumpcutter", "Run!"))
 
     def apply_settings(self, settings: dict):
         # comboboxes
@@ -428,7 +479,7 @@ def save_gui_settings(settings=None):
         json.dump(settings, settings_file)
 
 
-def initiateGUI():
+def initiate_gui():
     if not os.path.isfile(GUI_SETTINGS_FILENAME):
         save_gui_settings()
     app = QtWidgets.QApplication(sys.argv)
@@ -445,4 +496,4 @@ def initiateGUI():
 
 
 if __name__ == "__main__":
-    initiateGUI()
+    initiate_gui()
