@@ -11,7 +11,7 @@ from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
 from pytube import YouTube
 from scipy.io import wavfile
-import jumpcutterGuiController as GUI
+import jumpcutterGui as GUI
 
 TEMP_FOLDER = "TEMP"
 

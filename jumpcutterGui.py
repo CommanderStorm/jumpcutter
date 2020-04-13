@@ -1,99 +1,63 @@
 import json
+import os
 import sys
-
-
-def get_download_folder():
-    return ""
-
-
-def initiateGUI():
-    app = QtWidgets.QApplication(sys.argv)
-    jumpcutter = QtWidgets.QMainWindow()
-    ui = generate_ui_from_settings()
-    ui.setupUi(jumpcutter)
-    jumpcutter.show()
-    sys.exit(app.exec_())
-
-
-def generate_ui_from_settings():
-    with open("gui_settings.json", "r") as settings_file:
-        settings = json.load(settings_file)
-    if settings["source"] == "":
-        settings["source"] = get_download_folder()
-    if settings["destination"] == "":
-        settings["destination"] = get_download_folder()
-    ui = Ui_Jumpcutter()
-    ui.apply_settings(settings)
-    return ui
-
-
-def generate_gui_settings_json():
-    settings = {
-        "state_of_combobox": 1,
-        "source": "",
-        "destination": "",
-        "silent_threshold": 0.03,
-        "sounded_speed": 1.00,
-        "silent_speed": 5.00,
-        "frame_margin": 1,
-        "sample_rate": 44100,
-        "frame_rate": 30,
-        "frame_quality": 3
-    }
-    with open("gui_settings.json", "w+") as settings_file:
-        json.dump(settings, settings_file)
-
-
-if __name__ == "__main__":
-    generate_gui_settings_json()
-    initiateGUI()
-
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'jumpcutter.ui'
-#
-# Created by: PyQt5 UI code generator 5.13.2
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+GUI_SETTINGS_FILENAME = "gui_settings.json"
 
-class Ui_Jumpcutter(object):
-    def apply_settings(self, settings: dict):
-        # comboboxes
-        self.sourceSelectioncomboBox.setCurrentIndex(settings["state_of_combobox"])
-        # textboxes
-        self.sourceLineEdit.setText(settings["source"])
-        self.destinationLineEdit.setText(settings["destination"])
-        self.silentThresholdLineEdit.setText(settings["silent_threshold"])
-        self.soundedSpeedLineEdit.setText(settings["sounded_speed"])
-        self.silentSpeedLineEdit.setText(settings["silent_speed"])
-        self.frameMarginLineEdit.setText(settings["frame_margin"])
-        self.sampleRateLineEdit.setText(settings["sample_rate"])
-        self.frameRateLineEdit.setText(settings["frame_rate"])
-        # sliders
-        self.frameQualityhorizontalSlider.setValue(settings["frame_quality"])
+if os.name == 'nt':
+    import ctypes
+    from ctypes import windll, wintypes
+    from uuid import UUID
 
-    def get_settings(self):
-        settings = dict()
-        # comboboxes
-        settings["state_of_combobox"] = self.sourceSelectioncomboBox.currentIndex()
-        # textboxes
-        settings["source"] = self.sourceLineEdit.text()
-        settings["destination"] = self.destinationLineEdit.text()
-        settings["silent_threshold"] = self.silentThresholdLineEdit.text()
-        settings["sounded_speed"] = self.soundedSpeedLineEdit.text()
-        settings["silent_speed"] = self.silentSpeedLineEdit.text()
-        settings["frame_margin"] = self.frameMarginLineEdit.text()
-        settings["sample_rate"] = self.sampleRateLineEdit.text()
-        settings["frame_rate"] = self.frameRateLineEdit.text()
-        # sliders
-        settings["frame_quality"] = self.frameQualityhorizontalSlider.value()
-        return settings
 
-    def setupUi(self, Jumpcutter):
+    # ctypes GUID copied from MSDN sample code
+    class GUID(ctypes.Structure):
+        _fields_ = [
+            ("Data1", wintypes.DWORD),
+            ("Data2", wintypes.WORD),
+            ("Data3", wintypes.WORD),
+            ("Data4", wintypes.BYTE * 8)
+        ]
+
+        def __init__(self, uuidstr):
+            uuid = UUID(uuidstr)
+            ctypes.Structure.__init__(self)
+            self.Data1, self.Data2, self.Data3, \
+            self.Data4[0], self.Data4[1], rest = uuid.fields
+            for i in range(2, 8):
+                self.Data4[i] = rest >> (8 - i - 1) * 8 & 0xff
+
+
+    SHGetKnownFolderPath = windll.shell32.SHGetKnownFolderPath
+    SHGetKnownFolderPath.argtypes = [
+        ctypes.POINTER(GUID), wintypes.DWORD,
+        wintypes.HANDLE, ctypes.POINTER(ctypes.c_wchar_p)
+    ]
+
+
+    def _get_known_folder_path(uuidstr):
+        pathptr = ctypes.c_wchar_p()
+        guid = GUID(uuidstr)
+        if SHGetKnownFolderPath(ctypes.byref(guid), 0, 0, ctypes.byref(pathptr)):
+            raise ctypes.WinError()
+        return pathptr.value
+
+
+    FOLDERID_Download = '{374DE290-123F-4565-9164-39C4925E467B}'
+
+
+    def get_download_folder():
+        return _get_known_folder_path(FOLDERID_Download)
+else:
+    def get_download_folder():
+        home = os.path.expanduser("~")
+        return os.path.join(home, "Downloads")
+
+
+class UiJumpcutter(object):
+
+    def __init__(self, Jumpcutter):
         Jumpcutter.setObjectName("Jumpcutter")
         Jumpcutter.resize(790, 600)
         self.centralwidget = QtWidgets.QWidget(Jumpcutter)
@@ -402,3 +366,83 @@ class Ui_Jumpcutter(object):
         self.runButton.setToolTip(_translate("Jumpcutter",
                                              "<html><head/><body><p><span style=\" font-size:10pt;\">Modifies a video file to play at different speeds when there is sound vs. silence.<br/><br/></span><span style=\" font-size:12pt; font-weight:600;\">Expected Runtime is 0.5 to 2x the original playback speed<br/>Long videos may require python 64bit due to memory requirenments</span></p></body></html>"))
         self.runButton.setText(_translate("Jumpcutter", "Run!"))
+
+    def apply_settings(self, settings: dict):
+        # comboboxes
+        self.sourceSelectioncomboBox.setCurrentIndex(settings["state_of_combobox"])
+        # textboxes
+        self.sourceLineEdit.setText(settings["source"])
+        self.destinationLineEdit.setText(settings["destination"])
+        self.silentThresholdLineEdit.setText(str(settings["silent_threshold"]))
+        self.soundedSpeedLineEdit.setText(str(settings["sounded_speed"]))
+        self.silentSpeedLineEdit.setText(str(settings["silent_speed"]))
+        self.frameMarginLineEdit.setText(str(settings["frame_margin"]))
+        self.sampleRateLineEdit.setText(str(settings["sample_rate"]))
+        self.frameRateLineEdit.setText(str(settings["frame_rate"]))
+        # sliders
+        self.frameQualityhorizontalSlider.setValue(settings["frame_quality"])
+
+    def get_settings(self):
+        settings = dict()
+        # comboboxes
+        settings["state_of_combobox"] = self.sourceSelectioncomboBox.currentIndex()
+        # textboxes
+        settings["source"] = self.sourceLineEdit.text()
+        settings["destination"] = self.destinationLineEdit.text()
+        settings["silent_threshold"] = self.silentThresholdLineEdit.text()
+        settings["sounded_speed"] = self.soundedSpeedLineEdit.text()
+        settings["silent_speed"] = self.silentSpeedLineEdit.text()
+        settings["frame_margin"] = self.frameMarginLineEdit.text()
+        settings["sample_rate"] = self.sampleRateLineEdit.text()
+        settings["frame_rate"] = self.frameRateLineEdit.text()
+        # sliders
+        settings["frame_quality"] = self.frameQualityhorizontalSlider.value()
+        return settings
+
+
+def generate_settings():
+    with open(GUI_SETTINGS_FILENAME, "r") as settings_file:
+        settings = json.load(settings_file)
+    if settings["source"] == "":
+        settings["source"] = get_download_folder()
+    if settings["destination"] == "":
+        settings["destination"] = get_download_folder()
+    return settings
+
+
+def save_gui_settings(settings=None):
+    if settings is None:
+        settings = {
+            "state_of_combobox": 2,
+            "source": "",
+            "destination": "",
+            "silent_threshold": 0.03,
+            "sounded_speed": 1.00,
+            "silent_speed": 5.00,
+            "frame_margin": 1,
+            "sample_rate": 44100,
+            "frame_rate": 30,
+            "frame_quality": 3
+        }
+    with open(GUI_SETTINGS_FILENAME, "w+") as settings_file:
+        json.dump(settings, settings_file)
+
+
+def initiateGUI():
+    if not os.path.isfile(GUI_SETTINGS_FILENAME):
+        save_gui_settings()
+    app = QtWidgets.QApplication(sys.argv)
+    jumpcutter = QtWidgets.QMainWindow()
+    settings = generate_settings()
+    ui = UiJumpcutter(jumpcutter)
+    ui.apply_settings(settings)
+    jumpcutter.show()
+
+    # app was closed
+    exitcode = app.exec_()
+    save_gui_settings(ui.get_settings())
+    sys.exit(exitcode)
+
+
+if __name__ == "__main__":
+    initiateGUI()
