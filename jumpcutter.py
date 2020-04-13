@@ -1,16 +1,17 @@
 import argparse
-
+import glob
 import math
+import os
 import re
 import subprocess
 from shutil import copyfile, rmtree
-import glob
-import os
+
 import numpy as np
 from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
 from pytube import YouTube
 from scipy.io import wavfile
+
 import jumpcutterGui as Gui
 
 TEMP_FOLDER = "TEMP"
@@ -177,7 +178,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
 
 
 def process_folder(output_dir: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
-                   sample_rate: int, frame_rate: float, frame_quality: int, input_path: str):
+                   sample_rate: float, frame_rate: float, frame_quality: int, input_path: str):
     try:
         number_of_files = count_mp4_files_in_folder(input_path)
     except IOError:
@@ -203,14 +204,27 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
         process(output_file, silent_threshold, new_speed, frame_spreadage,
                 sample_rate, frame_rate, frame_quality, input_file)
     else:
-        print("No .mp4 Files found in the Input directory %s :C", input_path)
+        print("No .mp4 Files found in the Input directory '{}'    :(", input_path)
 
 
 def process_yt(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
-               sample_rate: int, frame_rate: float, frame_quality: int, input_url: str):
+               sample_rate: float, frame_rate: float, frame_quality: int, input_url: str):
     downloaded_video = download_file(input_url)
     process(output_file, silent_threshold, new_speed, frame_spreadage,
             sample_rate, frame_rate, frame_quality, downloaded_video)
+
+
+def process_settings(settings: dict):
+    new_speed = [settings["silent_speed"], settings["sounded_speed"]]
+    if settings["state_of_combobox"] == 0:  # ytdownload
+        process_yt(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
+                   settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
+    elif settings["state_of_combobox"] == 1:  # folder conversion
+        process_folder(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
+                       settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
+    else:  # file conversion
+        process(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
+                settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
 
 
 if __name__ == "__main__":
@@ -236,7 +250,7 @@ if __name__ == "__main__":
     parser.add_argument("--frame_margin", type=int, default=1,
                         help="some silent frames adjacent to sounded frames are included to provide context. How many "
                              "frames on either the side of speech should be included? That's this variable.")
-    parser.add_argument("--sample_rate", type=int, default=44100, help="sample rate of the input and output videos")
+    parser.add_argument("--sample_rate", type=float, default=44100, help="sample rate of the input and output videos")
     parser.add_argument("--frame_rate", type=float, default=30,
                         help="frame rate of the input and output videos. optional... I try to find it out myself, "
                              "but it doesn't always work.")
@@ -262,8 +276,8 @@ if __name__ == "__main__":
         process_yt(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                    SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_URL)
         GUI_NECESSARY = False
-    if args.dir is not None:
-        INPUT_Folder = args.dir
+    if args.input_dir is not None:
+        INPUT_Folder = args.input_dir
         process_folder(OUTPUT_DIR, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                        SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_Folder)
         GUI_NECESSARY = False

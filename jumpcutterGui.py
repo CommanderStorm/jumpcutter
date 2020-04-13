@@ -2,7 +2,8 @@ import json
 import os
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets, QtGui, QtCore
+import jumpcutter
 
 GUI_SETTINGS_FILENAME = "gui_settings.json"
 
@@ -290,6 +291,7 @@ class UiJumpcutter(object):
         self.verticalLayout_3.addItem(spacer_item)
         self.runButton = QtWidgets.QPushButton(self.horizontalLayoutWidget_2)
         self.runButton.setEnabled(True)
+        self.runButton.setAutoDefault(True)
         font = QtGui.QFont()
         font.setFamily("Calibri")
         font.setPointSize(16)
@@ -306,12 +308,14 @@ class UiJumpcutter(object):
         self.statusbar.setObjectName("statusbar")
         jumpcutter.setStatusBar(self.statusbar)
 
+        self.runButton.clicked.connect(self.on_click)  # ----------------------------
+
         self.retranslateUi(jumpcutter)
         QtCore.QMetaObject.connectSlotsByName(jumpcutter)
 
-    def retranslateUi(self, Jumpcutter):
+    def retranslateUi(self, jumpcutter):
         _translate = QtCore.QCoreApplication.translate
-        Jumpcutter.setWindowTitle(_translate("jumpcutter", "jumpcutter"))
+        jumpcutter.setWindowTitle(_translate("jumpcutter", "jumpcutter"))
         self.sourceSelectioncomboBox.setItemText(0, _translate("jumpcutter", "Download Video from Youtube"))
         self.sourceSelectioncomboBox.setItemText(1, _translate("jumpcutter", "Convert all .mp4\'s in a whole Folder"))
         self.sourceSelectioncomboBox.setItemText(2, _translate("jumpcutter", "Convert a single .mp4 File"))
@@ -436,19 +440,28 @@ class UiJumpcutter(object):
     def get_settings(self):
         settings = dict()
         # comboboxes
-        settings["state_of_combobox"] = self.sourceSelectioncomboBox.currentIndex()
+        settings["state_of_combobox"] = int(self.sourceSelectioncomboBox.currentIndex())
         # textboxes
         settings["source"] = self.sourceLineEdit.text()
         settings["destination"] = self.destinationLineEdit.text()
-        settings["silent_threshold"] = self.silentThresholdLineEdit.text()
-        settings["sounded_speed"] = self.soundedSpeedLineEdit.text()
-        settings["silent_speed"] = self.silentSpeedLineEdit.text()
-        settings["frame_margin"] = self.frameMarginLineEdit.text()
-        settings["sample_rate"] = self.sampleRateLineEdit.text()
-        settings["frame_rate"] = self.frameRateLineEdit.text()
+        settings["silent_threshold"] = float(self.silentThresholdLineEdit.text())
+        settings["sounded_speed"] = float(self.soundedSpeedLineEdit.text())
+        settings["silent_speed"] = float(self.silentSpeedLineEdit.text())
+        settings["frame_margin"] = int(self.frameMarginLineEdit.text())
+        settings["sample_rate"] = float(self.sampleRateLineEdit.text())
+        settings["frame_rate"] = float(self.frameRateLineEdit.text())
         # sliders
-        settings["frame_quality"] = self.frameQualityhorizontalSlider.value()
+        settings["frame_quality"] = int(self.frameQualityhorizontalSlider.value())
         return settings
+
+    def on_click(self):
+        self.runButton.setEnabled(False)
+        try:
+            jumpcutter.process_settings(self.get_settings())
+        except AssertionError:
+            print("assertion")
+        self.runButton.setEnabled(True)
+
 
 
 def generate_settings():
@@ -471,8 +484,8 @@ def save_gui_settings(settings=None):
             "sounded_speed": 1.00,
             "silent_speed": 5.00,
             "frame_margin": 1,
-            "sample_rate": 44100,
-            "frame_rate": 30,
+            "sample_rate": 44100.0,
+            "frame_rate": 30.0,
             "frame_quality": 3
         }
     with open(GUI_SETTINGS_FILENAME, "w+") as settings_file:
