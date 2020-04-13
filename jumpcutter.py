@@ -11,7 +11,7 @@ from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
 from pytube import YouTube
 from scipy.io import wavfile
-import jumpcutterGuiController
+import jumpcutterGuiController as GUI
 
 TEMP_FOLDER = "TEMP"
 
@@ -249,7 +249,7 @@ GUI_NECESSARY = True
 
 # these if any input option is chosen a gui does not make any sense
 if args.url is not None:
-    INPUT_URL = download_file(args.url)
+    INPUT_URL = args.url
     process_yt(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
                SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_URL)
     GUI_NECESSARY = False
@@ -264,4 +264,4 @@ if args.input_file is not None:
             SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_FILE)
     GUI_NECESSARY = False
 if GUI_NECESSARY:
-    jumpcutterGuiController.initiate()
+    GUI.initiateGUI()
