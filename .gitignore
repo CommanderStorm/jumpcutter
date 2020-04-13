@@ -1,10 +1,12 @@
+#programm specific files
+TEMP
+gui_settings.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 ffmpeg.exe
-
-TEMP
 
 # C extensions
 *.so

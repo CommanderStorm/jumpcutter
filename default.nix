@@ -22,10 +22,11 @@ let
     numpy
     pillow
     audiotsm
+    PyQt5
   ]);
   jumpcutter = stdenv.mkDerivation {
     pname = "jumpcutter";
-    version = "0.0.1";
+    version = "0.1.0";
     src = ./.;
     buildInputs = [
       pythonForThis
