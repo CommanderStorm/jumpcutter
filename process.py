@@ -1,9 +1,9 @@
 import math
-import os
 import re
 import subprocess
 from shutil import copyfile, rmtree
-
+import glob
+import os
 import numpy as np
 from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
@@ -61,106 +61,133 @@ def download_file(url):
     return newname
 
 
-def process(OUTPUT_FILE: str, SILENT_THRESHOLD: float, NEW_SPEED: list, FRAME_SPREADAGE: float,
-            SAMPLE_RATE: float, frameRate: float, FRAME_QUALITY: int, INPUT_FILE: str):
+def process(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: float,
+            sample_rate: float, frame_rate: float, frame_quality: int, input_file: str):
     global TEMP_FOLDER
-    assert INPUT_FILE is not None, "why u put no input file, that dum"
-    if len(OUTPUT_FILE) < 1:
-        OUTPUT_FILE = input_to_output_filename(INPUT_FILE)
+    assert input_file is not None, "why u put no input file, that dum"
+    if len(output_file) < 1:
+        output_file = input_to_output_filename(input_file)
 
     # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
     AUDIO_FADE_ENVELOPE_SIZE = 400
     create_path(TEMP_FOLDER)
-    command = "ffmpeg -i " + INPUT_FILE + " -qscale:v " + str(
-        FRAME_QUALITY) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
+    command = "ffmpeg -i " + input_file + " -qscale:v " + str(
+        frame_quality) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
     subprocess.call(command, shell=True)
-    command = "ffmpeg -i " + INPUT_FILE + " -ab 160k -ac 2 -ar " + str(
-        SAMPLE_RATE) + " -vn " + TEMP_FOLDER + "/audio.wav"
+    command = "ffmpeg -i " + input_file + " -ab 160k -ac 2 -ar " + str(
+        sample_rate) + " -vn " + TEMP_FOLDER + "/audio.wav"
     subprocess.call(command, shell=True)
     command = "ffmpeg -i " + TEMP_FOLDER + "/input.mp4 2>&1"
-    f = open(TEMP_FOLDER + "/params.txt", "w")
-    subprocess.call(command, shell=True, stdout=f)
+    with open(TEMP_FOLDER + "/params.txt", "w") as parameter_file:
+        subprocess.call(command, shell=True, stdout=parameter_file)
     sampleRate, audioData = wavfile.read(TEMP_FOLDER + "/audio.wav")
     audioSampleCount = audioData.shape[0]
     maxAudioVolume = get_max_volume(audioData)
-    f = open(TEMP_FOLDER + "/params.txt", 'r+')
-    pre_params = f.read()
-    f.close()
-    params = pre_params.split('\n')
-    for line in params:
-        m = re.search('Stream #.*Video.* ([0-9]*) fps', line)
-        if m is not None:
-            frameRate = float(m.group(1))
-    samplesPerFrame = sampleRate / frameRate
-    audioFrameCount: int = int(math.ceil(audioSampleCount / samplesPerFrame))
-    hasLoudAudio = np.zeros(audioFrameCount)
+    with open(TEMP_FOLDER + "/params.txt", 'r') as parameter_file:
+        lines = parameter_file.readlines()
+        for line in lines:
+            m = re.search('Stream #.*Video.* ([0-9]*) fps', line)
+            if m is not None:
+                frame_rate = float(m.group(1))
+    samples_per_frame = sampleRate / frame_rate
+    audio_frame_count: int = int(math.ceil(audioSampleCount / samples_per_frame))
+    has_loud_audio = np.zeros(audio_frame_count)
     i: int
-    for i in range(audioFrameCount):
-        start = int(i * samplesPerFrame)
-        end = min(int((i + 1) * samplesPerFrame), audioSampleCount)
+    for i in range(audio_frame_count):
+        start = int(i * samples_per_frame)
+        end = min(int((i + 1) * samples_per_frame), audioSampleCount)
         audiochunks = audioData[start:end]
-        maxchunksVolume = float(get_max_volume(audiochunks)) / maxAudioVolume
-        if maxchunksVolume >= SILENT_THRESHOLD:
-            hasLoudAudio[i] = 1
+        maxchunks_volume = float(get_max_volume(audiochunks)) / maxAudioVolume
+        if maxchunks_volume >= silent_threshold:
+            has_loud_audio[i] = 1
     chunks = [[0, 0, 0]]
-    shouldIncludeFrame = np.zeros(audioFrameCount)
-    for i in range(audioFrameCount):
-        start = int(max(0, i - FRAME_SPREADAGE))
-        end = int(min(audioFrameCount, i + 1 + FRAME_SPREADAGE))
-        shouldIncludeFrame[i] = np.max(hasLoudAudio[start:end])
-        if i >= 1 and shouldIncludeFrame[i] != shouldIncludeFrame[i - 1]:  # Did we flip?
-            chunks.append([chunks[-1][1], i, shouldIncludeFrame[i - 1]])
-    chunks.append([chunks[-1][1], audioFrameCount, shouldIncludeFrame[i - 1]])
+    should_include_frame = np.zeros(audio_frame_count)
+    for i in range(audio_frame_count):
+        start = int(max(0, i - frame_spreadage))
+        end = int(min(audio_frame_count, i + 1 + frame_spreadage))
+        should_include_frame[i] = np.max(has_loud_audio[start:end])
+        if i >= 1 and should_include_frame[i] != should_include_frame[i - 1]:  # Did we flip?
+            chunks.append([chunks[-1][1], i, should_include_frame[i - 1]])
+    chunks.append([chunks[-1][1], audio_frame_count, should_include_frame[i - 1]])
     chunks = chunks[1:]
-    outputAudioData = np.zeros((0, audioData.shape[1]))
-    outputPointer = 0
-    lastExistingFrame = None
+    output_audio_data = np.zeros((0, audioData.shape[1]))
+    output_pointer = 0
+    last_existing_frame = None
     for chunk in chunks:
-        audioChunk = audioData[int(chunk[0] * samplesPerFrame):int(chunk[1] * samplesPerFrame)]
+        audio_chunk = audioData[int(chunk[0] * samples_per_frame):int(chunk[1] * samples_per_frame)]
 
-        sFile = TEMP_FOLDER + "/tempStart.wav"
-        eFile = TEMP_FOLDER + "/tempEnd.wav"
-        wavfile.write(sFile, SAMPLE_RATE, audioChunk)
-        with WavReader(sFile) as reader:
-            with WavWriter(eFile, reader.channels, reader.samplerate) as writer:
-                tsm = phasevocoder(reader.channels, speed=NEW_SPEED[int(chunk[2])])
+        s_file = TEMP_FOLDER + "/tempStart.wav"
+        e_file = TEMP_FOLDER + "/tempEnd.wav"
+        wavfile.write(s_file, sample_rate, audio_chunk)
+        with WavReader(s_file) as reader:
+            with WavWriter(e_file, reader.channels, reader.samplerate) as writer:
+                tsm = phasevocoder(reader.channels, speed=new_speed[int(chunk[2])])
                 tsm.run(reader, writer)
-        _, alteredAudioData = wavfile.read(eFile)
+        _, alteredAudioData = wavfile.read(e_file)
         leng = alteredAudioData.shape[0]
-        endPointer = outputPointer + leng
-        outputAudioData = np.concatenate((outputAudioData, alteredAudioData / maxAudioVolume))
+        endPointer = output_pointer + leng
+        output_audio_data = np.concatenate((output_audio_data, alteredAudioData / maxAudioVolume))
 
-        # outputAudioData[outputPointer:endPointer] = alteredAudioData/maxAudioVolume
+        # output_audio_data[output_pointer:endPointer] = alteredAudioData/maxAudioVolume
 
         # smooth out transitiion's audio by quickly fading in/out
 
         if leng < AUDIO_FADE_ENVELOPE_SIZE:
-            outputAudioData[outputPointer:endPointer] = 0  # audio is less than 0.01 sec, let's just remove it.
+            output_audio_data[output_pointer:endPointer] = 0  # audio is less than 0.01 sec, let's just remove it.
         else:
             premask = np.arange(AUDIO_FADE_ENVELOPE_SIZE) / AUDIO_FADE_ENVELOPE_SIZE
             mask = np.repeat(premask[:, np.newaxis], 2, axis=1)  # make the fade-envelope mask stereo
-            outputAudioData[outputPointer:outputPointer + AUDIO_FADE_ENVELOPE_SIZE] *= mask
-            outputAudioData[endPointer - AUDIO_FADE_ENVELOPE_SIZE:endPointer] *= 1 - mask
+            output_audio_data[output_pointer:output_pointer + AUDIO_FADE_ENVELOPE_SIZE] *= mask
+            output_audio_data[endPointer - AUDIO_FADE_ENVELOPE_SIZE:endPointer] *= 1 - mask
 
-        startOutputFrame = int(math.ceil(outputPointer / samplesPerFrame))
-        endOutputFrame = int(math.ceil(endPointer / samplesPerFrame))
+        startOutputFrame = int(math.ceil(output_pointer / samples_per_frame))
+        endOutputFrame = int(math.ceil(endPointer / samples_per_frame))
         for outputFrame in range(startOutputFrame, endOutputFrame):
-            inputFrame = int(chunk[0] + NEW_SPEED[int(chunk[2])] * (outputFrame - startOutputFrame))
+            inputFrame = int(chunk[0] + new_speed[int(chunk[2])] * (outputFrame - startOutputFrame))
             didItWork = copy_frame(inputFrame, outputFrame)
             if didItWork:
-                lastExistingFrame = inputFrame
+                last_existing_frame = inputFrame
             else:
-                copy_frame(lastExistingFrame, outputFrame)
+                copy_frame(last_existing_frame, outputFrame)
 
-        outputPointer = endPointer
-    wavfile.write(TEMP_FOLDER + "/audioNew.wav", SAMPLE_RATE, outputAudioData)
+        output_pointer = endPointer
+    wavfile.write(TEMP_FOLDER + "/audioNew.wav", sample_rate, output_audio_data)
     '''
-    outputFrame = math.ceil(outputPointer/samplesPerFrame)
-    for endGap in range(outputFrame,audioFrameCount):
-        copy_frame(int(audioSampleCount/samplesPerFrame)-1,endGap)
+    outputFrame = math.ceil(output_pointer/samples_per_frame)
+    for endGap in range(outputFrame,audio_frame_count):
+        copy_frame(int(audioSampleCount/samples_per_frame)-1,endGap)
     '''
-    command = "ffmpeg -framerate " + str(
-        frameRate) + " -i " + TEMP_FOLDER + "/newFrame%06d.jpg -i " + TEMP_FOLDER \
-              + "/audioNew.wav -strict -2 " + OUTPUT_FILE + " -thread_queue_size 16"
+    command = "ffmpeg -framerate {0} -i {1}/newFrame%06d.jpg -i {2}/audioNew.wav -strict -2 {3} -thread_queue_size 16".format(
+        str(frame_rate), TEMP_FOLDER, TEMP_FOLDER, output_file)
     subprocess.call(command, shell=True)
     deletePath(TEMP_FOLDER)
+
+
+def count_mp4_files_in_folder(input_path: str):
+    return len(glob.glob1(input_path, "*.mp4"))
+
+
+def process_folder(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: float,
+                   sample_rate: float, frame_rate: float, frame_quality: int, input_path: str):
+    try:
+        number_of_files = count_mp4_files_in_folder(input_path)
+    except IOError:
+        print("something went wrong when trying to access the '%s' - Folder" % input_path)
+        return
+
+    if number_of_files > 0:
+        print("\nInput-Source is the '%s' - Folder" % input_path)
+        if number_of_files > 1:
+            print("('%s' - Folder has %d .mp4 Files)" % (input_path, number_of_files))
+        else:
+            print("('%s' - Folder has 1 .mp4 File)" % input_path)
+        filecount = 1
+        for filename in glob.glob1(input_path, "*.mp4"):
+            print("\n-----------------------------------------"
+                  "\nFile #", filecount)
+            filecount += 1
+            input_file = input_path + "/" + filename
+            process(output_file, silent_threshold, new_speed, frame_spreadage,
+                    sample_rate, frame_rate, frame_quality, input_file)
+    else:
+        print("no .mp4 files found")
