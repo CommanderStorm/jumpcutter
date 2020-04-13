@@ -11,7 +11,7 @@ from audiotsm import phasevocoder
 from audiotsm.io.wav import WavReader, WavWriter
 from pytube import YouTube
 from scipy.io import wavfile
-import jumpcutterGui as GUI
+import jumpcutterGui as Gui
 
 TEMP_FOLDER = "TEMP"
 
@@ -176,7 +176,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     delete_path(TEMP_FOLDER)
 
 
-def process_folder(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
+def process_folder(output_dir: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
                    sample_rate: int, frame_rate: float, frame_quality: int, input_path: str):
     try:
         number_of_files = count_mp4_files_in_folder(input_path)
@@ -186,20 +186,24 @@ def process_folder(output_file: str, silent_threshold: float, new_speed: list, f
 
     if number_of_files > 0:
         print("\nInput-Source is the '%s' - Folder" % input_path)
-        if number_of_files > 1:
-            print("('%s' - Folder has %d .mp4 Files)" % (input_path, number_of_files))
-        else:
-            print("('%s' - Folder has 1 .mp4 File)" % input_path)
+        print("This Folder has %d .mp4 Files" % number_of_files)
         filecount = 1
         for filename in glob.glob1(input_path, "*.mp4"):
             print("\n-----------------------------------------"
                   "\nFile #", filecount)
             filecount += 1
-            input_file = input_path + "/" + filename
-            process(output_file, silent_threshold, new_speed, frame_spreadage,
-                    sample_rate, frame_rate, frame_quality, input_file)
+            input_file = os.path.join(input_path, filename)
+            ouput_filename = filename + "_Altered"
+            output_file = os.path.join(output_dir, ouput_filename)
+            # we are ignoring here that a max filename exists, because I dont think that people would use it that way
+            # and if they do .. WHY
+            while os.path.isfile(output_file):
+                ouput_filename += "_Altered"
+
+        process(output_file, silent_threshold, new_speed, frame_spreadage,
+                sample_rate, frame_rate, frame_quality, input_file)
     else:
-        print("no .mp4 files found")
+        print("No .mp4 Files found in the Input directory %s :C", input_path)
 
 
 def process_yt(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
@@ -209,59 +213,65 @@ def process_yt(output_file: str, silent_threshold: float, new_speed: list, frame
             sample_rate, frame_rate, frame_quality, downloaded_video)
 
 
-parser = argparse.ArgumentParser(
-    description="Modifies a video file to play at different speeds when there is sound vs. silence.")
-parser.add_argument("--input_file", type=str, help="the video file you want modified")
-parser.add_argument("--url", type=str, help="A youtube url to download and process")
-parser.add_argument("--dir", type=str,
-                    help="all .mp4 files in this whole folder will be sequentially processed [to save memory and "
-                         "disc space and because it would only run marginally faster if parallel]")
-parser.add_argument("--output_file", type=str, default="",
-                    help="the output file. (optional. if not included, it'll just modify the input file name)")
-parser.add_argument("--silent_threshold", type=float, default=0.03,
-                    help="the volume amount that frames' audio needs to surpass to be consider \"sounded\". It ranges "
-                         "from 0 (silence) to 1 (max volume)")
-parser.add_argument("--sounded_speed", type=float, default=1.00,
-                    help="the speed that sounded (spoken) frames should be played at. Typically 1.")
-parser.add_argument("--silent_speed", type=float, default=5.00,
-                    help="the speed that silent frames should be played at. 999999 for jumpcutting.")
-parser.add_argument("--frame_margin", type=int, default=1,
-                    help="some silent frames adjacent to sounded frames are included to provide context. How many "
-                         "frames on either the side of speech should be included? That's this variable.")
-parser.add_argument("--sample_rate", type=int, default=44100, help="sample rate of the input and output videos")
-parser.add_argument("--frame_rate", type=float, default=30,
-                    help="frame rate of the input and output videos. optional... I try to find it out myself, "
-                         "but it doesn't always work.")
-parser.add_argument("--frame_quality", type=int, default=3,
-                    help="quality of frames to be extracted from input video. 1 is highest, 31 is lowest, 3 is the "
-                         "default.")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Modifies a video file to play at different speeds when there is sound vs. silence.")
+    parser.add_argument("--input_file", type=str, help="the video file you want modified")
+    parser.add_argument("--url", type=str, help="A youtube url to download and process")
+    parser.add_argument("--input_dir", type=str,
+                        help="all .mp4 files in this whole folder will be sequentially processed [to save memory and "
+                             "disc space and because it would only run marginally faster if parallel]")
+    parser.add_argument("--output_dir", type=str, default=Gui.get_download_folder(),
+                        help="While converting a whole Directory using the '--input_dir'-Argument, you can supply a "
+                             "Output-Directory in which the Files will be placed")
+    parser.add_argument("--output_file", type=str, default="",
+                        help="the output file. (optional. if not included, it'll just modify the input file name)")
+    parser.add_argument("--silent_threshold", type=float, default=0.03,
+                        help="the volume amount that frames' audio needs to surpass to be consider \"sounded\". It ranges "
+                             "from 0 (silence) to 1 (max volume)")
+    parser.add_argument("--sounded_speed", type=float, default=1.00,
+                        help="the speed that sounded (spoken) frames should be played at. Typically 1.")
+    parser.add_argument("--silent_speed", type=float, default=5.00,
+                        help="the speed that silent frames should be played at. 999999 for jumpcutting.")
+    parser.add_argument("--frame_margin", type=int, default=1,
+                        help="some silent frames adjacent to sounded frames are included to provide context. How many "
+                             "frames on either the side of speech should be included? That's this variable.")
+    parser.add_argument("--sample_rate", type=int, default=44100, help="sample rate of the input and output videos")
+    parser.add_argument("--frame_rate", type=float, default=30,
+                        help="frame rate of the input and output videos. optional... I try to find it out myself, "
+                             "but it doesn't always work.")
+    parser.add_argument("--frame_quality", type=int, default=3,
+                        help="quality of frames to be extracted from input video. 1 is highest, 31 is lowest, 3 is the "
+                             "default.")
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-FRAME_RATE = args.frame_rate
-SAMPLE_RATE = args.sample_rate
-SILENT_THRESHOLD = args.silent_threshold
-FRAME_SPREADAGE = args.frame_margin
-NEW_SPEED = [args.silent_speed, args.sounded_speed]
-FRAME_QUALITY = args.frame_quality
-OUTPUT_FILE = args.output_file
-GUI_NECESSARY = True
+    FRAME_RATE = args.frame_rate
+    SAMPLE_RATE = args.sample_rate
+    SILENT_THRESHOLD = args.silent_threshold
+    FRAME_SPREADAGE = args.frame_margin
+    NEW_SPEED = [args.silent_speed, args.sounded_speed]
+    FRAME_QUALITY = args.frame_quality
+    OUTPUT_FILE = args.output_file
+    OUTPUT_DIR = args.output_dir
 
-# these if any input option is chosen a gui does not make any sense
-if args.url is not None:
-    INPUT_URL = args.url
-    process_yt(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-               SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_URL)
-    GUI_NECESSARY = False
-if args.dir is not None:
-    INPUT_Folder = args.dir
-    process_folder(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-                   SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_Folder)
-    GUI_NECESSARY = False
-if args.input_file is not None:
-    INPUT_FILE = args.input_file
-    process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-            SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_FILE)
-    GUI_NECESSARY = False
-if GUI_NECESSARY:
-    GUI.initiateGUI()
+    GUI_NECESSARY = True
+
+    if args.url is not None:
+        INPUT_URL = args.url
+        process_yt(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                   SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_URL)
+        GUI_NECESSARY = False
+    if args.dir is not None:
+        INPUT_Folder = args.dir
+        process_folder(OUTPUT_DIR, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                       SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_Folder)
+        GUI_NECESSARY = False
+    if args.input_file is not None:
+        INPUT_FILE = args.input_file
+        process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                SAMPLE_RATE, FRAME_RATE, FRAME_QUALITY, INPUT_FILE)
+        GUI_NECESSARY = False
+    # these if any input option is chosen a gui does not make any sense
+    if GUI_NECESSARY:
+        Gui.initiate_gui()
