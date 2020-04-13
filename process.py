@@ -61,6 +61,10 @@ def download_file(url):
     return newname
 
 
+def count_mp4_files_in_folder(input_path: str):
+    return len(glob.glob1(input_path, "*.mp4"))
+
+
 def process(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: float,
             sample_rate: float, frame_rate: float, frame_quality: int, input_file: str):
     global TEMP_FOLDER
@@ -163,10 +167,6 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     deletePath(TEMP_FOLDER)
 
 
-def count_mp4_files_in_folder(input_path: str):
-    return len(glob.glob1(input_path, "*.mp4"))
-
-
 def process_folder(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: float,
                    sample_rate: float, frame_rate: float, frame_quality: int, input_path: str):
     try:
@@ -191,3 +191,10 @@ def process_folder(output_file: str, silent_threshold: float, new_speed: list, f
                     sample_rate, frame_rate, frame_quality, input_file)
     else:
         print("no .mp4 files found")
+
+
+def process_yt(output_file, silent_threshold, new_speed, frame_spreadage, sample_rate, frame_rate, frame_quality,
+               input_url):
+    downloaded_video = download_file(input_url)
+    process(output_file, silent_threshold, new_speed, frame_spreadage,
+            sample_rate, frame_rate, frame_quality, downloaded_video)

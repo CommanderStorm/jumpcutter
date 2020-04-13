@@ -295,13 +295,3 @@ class Ui_Jumpcutter(object):
         self.label_4.setText(_translate("Jumpcutter", "Slilent Threshold"))
         self.runButton.setToolTip(_translate("Jumpcutter", "<html><head/><body><p><span style=\" font-size:10pt;\">Modifies a video file to play at different speeds when there is sound vs. silence.<br/><br/></span><span style=\" font-size:12pt; font-weight:600;\">Expected Runtime is 0.5 to 2x the original playback speed<br/>Long videos may require python 64bit due to memory requirenments</span></p></body></html>"))
         self.runButton.setText(_translate("Jumpcutter", "Run!"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Jumpcutter = QtWidgets.QMainWindow()
-    ui = Ui_Jumpcutter()
-    ui.setupUi(Jumpcutter)
-    Jumpcutter.show()
-    sys.exit(app.exec_())

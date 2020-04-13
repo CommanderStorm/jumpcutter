@@ -6,6 +6,7 @@ parser = argparse.ArgumentParser(
     description='Modifies a video file to play at different speeds when there is sound vs. silence.')
 parser.add_argument('--input_file', type=str, help='the video file you want modified')
 parser.add_argument('--url', type=str, help='A youtube url to download and process')
+parser.add_argument('--dir', type=str, help='all .mp4 files in this whole folder will be sequentially jumpcuttet')
 parser.add_argument('--output_file', type=str, default="",
                     help="the output file. (optional. if not included, it'll just modify the input file name)")
 parser.add_argument('--silent_threshold', type=float, default=0.03,
@@ -33,14 +34,18 @@ SAMPLE_RATE = args.sample_rate
 SILENT_THRESHOLD = args.silent_threshold
 FRAME_SPREADAGE = args.frame_margin
 NEW_SPEED = [args.silent_speed, args.sounded_speed]
-if args.url is not None:
-    INPUT_FILE = pro.download_file(args.url)
-else:
-    INPUT_FILE = args.input_file
-URL = args.url
 FRAME_QUALITY = args.frame_quality
-
 OUTPUT_FILE = args.output_file
 
-pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
-            SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
+if args.url is not None:
+    INPUT_Url = pro.download_file(args.url)
+    pro.process_yt(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                       SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_Url)
+if args.dir is not None:
+    INPUT_Folder = args.dir
+    pro.process_folder(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                       SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_Folder)
+if args.input_file is not None:
+    INPUT_FILE = args.input_file
+    pro.process(OUTPUT_FILE, SILENT_THRESHOLD, NEW_SPEED, FRAME_SPREADAGE,
+                SAMPLE_RATE, frameRate, FRAME_QUALITY, INPUT_FILE)
