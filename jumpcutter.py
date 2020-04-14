@@ -199,10 +199,10 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
             # we are ignoring here that a max filename exists, because I dont think that people would use it that way
             # and if they do .. WHY
             while os.path.isfile(output_file):
-                ouput_filename += "_Altered"
+                output_file += "_Altered"
 
-        process(output_file, silent_threshold, new_speed, frame_spreadage,
-                sample_rate, frame_rate, frame_quality, input_file)
+            process(output_file, silent_threshold, new_speed, frame_spreadage,
+                    sample_rate, frame_rate, frame_quality, input_file)
     else:
         print("No .mp4 Files found in the Input directory '{}'    :(", input_path)
 

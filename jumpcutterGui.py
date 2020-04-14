@@ -481,13 +481,13 @@ class UiJumpcutter(object):
         self.runButton.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.runButton.setAutoDefault(True)
         self.runButton.setDefault(True)
-        self.runButton.setFlat(False)
         self.runButton.setObjectName("runButton")
         self.verticalLayout_3.addWidget(self.runButton)
         main_window.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(main_window)
         self.statusbar.setObjectName("statusbar")
         main_window.setStatusBar(self.statusbar)
+        # buddy's
         self.label_12.setBuddy(self.sourceSelectioncomboBox)
         self.label.setBuddy(self.sourceLineEdit)
         self.label_3.setBuddy(self.destinationLineEdit)
@@ -500,6 +500,8 @@ class UiJumpcutter(object):
         self.label_10.setBuddy(self.frameMarginLineEdit)
 
         self.retranslate_ui(main_window)
+        self.mode_switch()
+        # tab's
         QtCore.QMetaObject.connectSlotsByName(main_window)
         main_window.setTabOrder(self.sourceSelectioncomboBox, self.sourceSelectionButton)
         main_window.setTabOrder(self.sourceSelectionButton, self.destinationSelectionButton)
