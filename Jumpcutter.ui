@@ -6,21 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>790</width>
-    <height>600</height>
+    <width>900</width>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Jumpcutter</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>761</width>
-      <height>571</height>
+      <x>8</x>
+      <y>10</y>
+      <width>861</width>
+      <height>711</height>
      </rect>
     </property>
     <property name="font">
@@ -29,589 +29,851 @@
       <pointsize>12</pointsize>
      </font>
     </property>
-    <property name="cursor">
-     <cursorShape>ArrowCursor</cursorShape>
+    <property name="toolTip">
+     <string notr="true"/>
     </property>
-    <property name="locale">
-     <locale language="English" country="UnitedStates"/>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <widget class="QLabel" name="label_12">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>1. Main Processing Options Selection</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::AutoText</enum>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
+       </property>
+       <property name="buddy">
+        <cstring>sourceSelectioncomboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="sourceSelectioncomboBox">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+         <stylestrategy>PreferAntialias</stylestrategy>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QComboBox" name="sourceSelectioncomboBox">
+        <property name="text">
+         <string>Download Video from Youtube</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Convert all .mp4's in a whole Folder</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Convert a single .mp4 File</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_5">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_4">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_11">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>2. Source and Destination Settings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="1" column="0">
+        <widget class="QLabel" name="label">
          <property name="font">
           <font>
            <family>Calibri</family>
            <pointsize>12</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-           <stylestrategy>PreferAntialias</stylestrategy>
-          </font>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
-         </property>
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>Download Video from Youtube</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Convert all .mp4's in a whole Folder</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Convert a single .mp4 File</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI/URL depending on what is selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Source:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="sourceLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI/URL depending on what is selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhUrlCharactersOnly</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Destination:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="destinationLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhUrlCharactersOnly</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="Line" name="line">
-         <property name="font">
-          <font>
-           <family>Calibri</family>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_9">
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
-         </property>
-         <property name="text">
-          <string>Detailed Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout">
-         <property name="leftMargin">
-          <number>25</number>
-         </property>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The volume amount that frames' audio needs to surpass to be consider &amp;quot;sounded&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;It ranges from 0 (silence) to 1 (max volume)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Slilent Threshold</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="silentThresholdLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The volume amount that frames' audio needs to surpass to be consider &amp;quot;sounded&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;It ranges from 0 (silence) to 1 (max volume)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhFormattedNumbersOnly</set>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="acceptDrops">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The speed that silent frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;999999 for jumpcutting.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Silent Speed</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="silentSpeedLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The speed that silent frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;999999 for jumpcutting.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;the speed that sounded (spoken) frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Typically 1 to 1.5&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Sounded Speed</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="soundedSpeedLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;the speed that sounded (spoken) frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Typically 1 to 1.5&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Sample rate of the input and output videos&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Sample Rate</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="sampleRateLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Sample rate of the input and output videos&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="frameRateLineEdit">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>IBeamCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Frame rate of the input and output videos. optional... I try to find it out myself,&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;But it doesn't always work.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-           <property name="text">
-            <string notr="true"/>
-           </property>
-           <property name="maxLength">
-            <number>4</number>
-           </property>
-           <property name="echoMode">
-            <enum>QLineEdit::Normal</enum>
-           </property>
-           <property name="placeholderText">
-            <string notr="true"/>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;3 is the default.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Frame Quality</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QSlider" name="frameQualityhorizontalSlider">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;3 is the default.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>31</number>
-           </property>
-           <property name="value">
-            <number>3</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="font">
-            <font>
-             <family>Calibri</family>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="cursor">
-            <cursorShape>ArrowCursor</cursorShape>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Frame rate of the input and output videos. optional... I try to find it out myself,&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;But it doesn't always work.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="locale">
-            <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="text">
-            <string>Frame Rate</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Frame Margin</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QLineEdit" name="frameMarginLineEdit">
-           <property name="inputMethodHints">
-            <set>Qt::ImhDigitsOnly</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="Line" name="line_2">
-         <property name="font">
-          <font>
-           <family>Calibri</family>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="font">
-          <font>
-           <family>Calibri</family>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="runButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="font">
-          <font>
-           <family>Calibri</family>
-           <pointsize>16</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
           </font>
          </property>
          <property name="cursor">
           <cursorShape>ArrowCursor</cursorShape>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Modifies a video file to play at different speeds when there is sound vs. silence.&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Expected Runtime is 0.5 to 2x the original playback speed&lt;br/&gt;Long videos may require python 64bit due to memory requirenments&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI/URL depending on what is selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="locale">
           <locale language="English" country="UnitedStates"/>
          </property>
          <property name="text">
-          <string>Run!</string>
+          <string>Source:</string>
          </property>
-         <property name="autoDefault">
-          <bool>true</bool>
+         <property name="buddy">
+          <cstring>sourceLineEdit</cstring>
          </property>
-         <property name="default">
-          <bool>true</bool>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="sourceLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
          </property>
-         <property name="flat">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI/URL depending on what is selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhUrlCharactersOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Destination:</string>
+         </property>
+         <property name="buddy">
+          <cstring>destinationLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="destinationLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Format: Full URI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhUrlCharactersOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="sourceSelectionButton">
+           <property name="font">
+            <font>
+             <family>Calibri</family>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Opens a Source Selection Popup Depending on the Processing option selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Select Source Popup</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="destinationSelectionButton">
+           <property name="font">
+            <font>
+             <family>Calibri</family>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Opens a Destination Selection Popup Depending on the Processing option selected above&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Select Destination Popup</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_9">
+       <property name="toolTip">
+        <string notr="true"/>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="text">
+        <string>3. Detailed Settings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QFormLayout" name="formLayout">
+       <property name="leftMargin">
+        <number>25</number>
+       </property>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The volume amount that frames' audio needs to surpass to be consider &amp;quot;sounded&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;It ranges from 0 (silence) to 1 (max volume)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Slilent Threshold</string>
+         </property>
+         <property name="buddy">
+          <cstring>silentThresholdLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="silentThresholdLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The volume amount that frames' audio needs to surpass to be consider &amp;quot;sounded&amp;quot;.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;It ranges from 0 (silence) to 1 (max volume)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhFormattedNumbersOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The speed that silent frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;999999 for jumpcutting.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Silent Speed</string>
+         </property>
+         <property name="buddy">
+          <cstring>silentSpeedLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="silentSpeedLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;The speed that silent frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;999999 for jumpcutting.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhDigitsOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;the speed that sounded (spoken) frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Typically 1 to 1.5&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Sounded Speed</string>
+         </property>
+         <property name="buddy">
+          <cstring>soundedSpeedLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="soundedSpeedLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;the speed that sounded (spoken) frames should be played at.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Typically 1 to 1.5&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhDigitsOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Sample rate of the input and output videos&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Sample Rate</string>
+         </property>
+         <property name="buddy">
+          <cstring>sampleRateLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="sampleRateLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Sample rate of the input and output videos&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhDigitsOnly</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="frameRateLineEdit">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Frame rate of the input and output videos. optional... I try to find it out myself,&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;But it doesn't always work.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhDigitsOnly</set>
+         </property>
+         <property name="text">
+          <string notr="true"/>
+         </property>
+         <property name="maxLength">
+          <number>4</number>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+         <property name="placeholderText">
+          <string notr="true"/>
+         </property>
+         <property name="clearButtonEnabled">
           <bool>false</bool>
          </property>
         </widget>
        </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;3 is the default.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Frame Quality</string>
+         </property>
+         <property name="buddy">
+          <cstring>frameQualityhorizontalSlider</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QSlider" name="frameQualityhorizontalSlider">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Quality of frames to be extracted from input video. 1 is highest, 31 is lowest, &lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;3 is the default.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>31</number>
+         </property>
+         <property name="value">
+          <number>3</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Frame rate of the input and output videos. optional... I try to find it out myself,&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;But it doesn't always work.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
+         <property name="text">
+          <string>Frame Rate</string>
+         </property>
+         <property name="buddy">
+          <cstring>frameRateLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="font">
+          <font>
+           <family>Calibri</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Frame Margin</string>
+         </property>
+         <property name="buddy">
+          <cstring>frameMarginLineEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="frameMarginLineEdit">
+         <property name="toolTip">
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;some silent frames adjacent to sounded frames are included to provide context. How many frames on either the side of speech should be included? That's this variable.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="inputMethodHints">
+          <set>Qt::ImhDigitsOnly</set>
+         </property>
+        </widget>
+       </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_6">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">Vertical Spacer 'verticalSpacer', 20 x 40</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="runButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>18</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>ArrowCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Modifies a video file to play at different speeds when there is sound vs. silence.&lt;br/&gt;&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Expected Runtime is 0.5 to 2x the original playback speed&lt;br/&gt;Long videos may require python 64bit due to memory requirenments&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
+       <property name="text">
+        <string>4. Run!</string>
+       </property>
+       <property name="autoDefault">
+        <bool>true</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>sourceSelectioncomboBox</tabstop>
+  <tabstop>sourceSelectionButton</tabstop>
+  <tabstop>destinationSelectionButton</tabstop>
+  <tabstop>sourceLineEdit</tabstop>
+  <tabstop>destinationLineEdit</tabstop>
+  <tabstop>silentThresholdLineEdit</tabstop>
+  <tabstop>silentSpeedLineEdit</tabstop>
+  <tabstop>soundedSpeedLineEdit</tabstop>
+  <tabstop>sampleRateLineEdit</tabstop>
+  <tabstop>frameRateLineEdit</tabstop>
+  <tabstop>frameMarginLineEdit</tabstop>
+  <tabstop>frameQualityhorizontalSlider</tabstop>
+  <tabstop>runButton</tabstop>
+ </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>runButton</sender>
-   <signal>clicked()</signal>
-   <receiver>Jumpcutter</receiver>
-   <slot>hide()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>390</x>
-     <y>551</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>394</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
