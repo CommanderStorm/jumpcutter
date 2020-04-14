@@ -114,9 +114,9 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         frame_quality) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
     subprocess.call(command, shell=True)
     command = "ffmpeg -i " + input_file + " -ab 160k -ac 2 -ar " + str(
-        sample_rate) + " -vn " + TEMP_FOLDER + "/audio.wav"
+        sample_rate) + " -vn " + TEMP_FOLDER + "/audio.wav -hide_banner"
     subprocess.call(command, shell=True)
-    command = "ffmpeg -i " + TEMP_FOLDER + "/input.mp4 2>&1"
+    command = "ffmpeg -i " + TEMP_FOLDER + "/input.mp4 2>&1 -hide_banner"
     with open(TEMP_FOLDER + "/params.txt", "w") as parameter_file:
         subprocess.call(command, shell=True, stdout=parameter_file)
     sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/audio.wav")
@@ -203,6 +203,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
               "-i {2}/audioNew.wav " \
               "-strict " \
               "-2 {3} " \
+              "-hide_banner" \
         .format(str(frame_rate), TEMP_FOLDER, TEMP_FOLDER, output_file)
     subprocess.call(command, shell=True)
     delete_path(TEMP_FOLDER)
