@@ -198,12 +198,12 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         copy_frame(int(audio_sample_count/samples_per_frame)-1,endGap)
     """
     command = "ffmpeg " \
-              "-framerate {0} " \
+              "-r {0} " \
               "-i {1}/newFrame%06d.jpg " \
               "-i {2}/audioNew.wav " \
-              "-strict -2 {3} " \
-              "-thread_queue_size {4}" \
-        .format(str(frame_rate), TEMP_FOLDER, TEMP_FOLDER, output_file, os.cpu_count())
+              "-strict " \
+              "-2 {3} " \
+        .format(str(frame_rate), TEMP_FOLDER, TEMP_FOLDER, output_file)
     subprocess.call(command, shell=True)
     delete_path(TEMP_FOLDER)
 
@@ -230,7 +230,7 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
             # we are ignoring here that a max filename exists, because I dont think that people would use it that way
             # and if they do .. WHY
             while os.path.isfile(output_file):
-                output_file += "_Altered"
+                output_file += "_Altered"  # TODO
 
             process(output_file, silent_threshold, new_speed, frame_spreadage,
                     sample_rate, frame_rate, frame_quality, input_file)
@@ -246,16 +246,23 @@ def process_yt(output_file: str, silent_threshold: float, new_speed: list, frame
 
 
 def process_settings(settings: dict):
+    combobox = settings["state_of_combobox"]
     new_speed = [settings["silent_speed"], settings["sounded_speed"]]
-    if settings["state_of_combobox"] == 0:  # ytdownload
-        process_yt(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
-                   settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
-    elif settings["state_of_combobox"] == 1:  # folder conversion
-        process_folder(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
-                       settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
+
+    if combobox == 0:  # ytdownload
+        process_yt("{}".format(settings["destination"]), settings["silent_threshold"], new_speed,
+                   settings["frame_margin"], settings["sample_rate"], settings["frame_rate"], settings["frame_quality"],
+                   "{}".format(settings["source"]))
+
+    elif combobox == 1:  # folder conversion
+        process_folder("{}".format(settings["destination"]), settings["silent_threshold"], new_speed,
+                       settings["frame_margin"], settings["sample_rate"], settings["frame_rate"],
+                       settings["frame_quality"], "{}".format(settings["source"]))
+
     else:  # file conversion
-        process(settings["destination"], settings["silent_threshold"], new_speed, settings["frame_margin"],
-                settings["sample_rate"], settings["frame_rate"], settings["frame_quality"], settings["source"])
+        process("{}".format(settings["destination"]), settings["silent_threshold"], new_speed, settings["frame_margin"],
+                settings["sample_rate"], settings["frame_rate"], settings["frame_quality"],
+                "{}".format(settings["source"]))
 
 
 #   ______                                                                   __  __  __
@@ -288,7 +295,6 @@ def process_settings(settings: dict):
 #  $$$$$$/    $$$$/   $$$$$$/  $$/       $$/
 #
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Modifies a video file to play at different speeds when there is sound vs. silence.")
@@ -312,7 +318,8 @@ if __name__ == "__main__":
     parser.add_argument("--frame_margin", type=int, default=1,
                         help="some silent frames adjacent to sounded frames are included to provide context. How many "
                              "frames on either the side of speech should be included? That's this variable.")
-    parser.add_argument("--sample_rate", type=float, default=44100, help="sample rate of the input and output videos")
+    parser.add_argument("--sample_rate", type=float, default=44100,
+                        help="sample rate of the input and output videos")
     parser.add_argument("--frame_rate", type=float, default=30,
                         help="frame rate of the input and output videos. optional... I try to find it out myself, "
                              "but it doesn't always work.")

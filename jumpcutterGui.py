@@ -74,14 +74,14 @@ def get_download_folder():
         return os.path.join(home, "Downloads")
 
 
-def save_file(starting_path="", message="Select a filename"):
+def save_file(starting_path="", message="Save a filename"):
     user_input = QFileDialog.getSaveFileName(None, message, get_download_folder(), filter="*.mp4")[0]
     if len(user_input) is not None:
         return user_input
     return starting_path
 
 
-def choose_file(starting_path="", message="Select a filename"):
+def choose_file(starting_path="", message="Select a file"):
     user_input = QFileDialog.getOpenFileName(None, message, get_download_folder(), filter="*.mp4")[0]
     if len(user_input) is not None:
         return user_input
@@ -114,7 +114,6 @@ def choose_directory(starting_path="", message='Select a folder'):
 # $$    $$/  $$  $$/ $$    $$/ $$ |      $$ |
 #  $$$$$$/    $$$$/   $$$$$$/  $$/       $$/
 
-
 def create_warning_popup(text: str):
     msg = QMessageBox()
     msg.setWindowTitle("Something Went Wrong")
@@ -123,7 +122,7 @@ def create_warning_popup(text: str):
     msg.exec_()
 
 
-class UiJumpcutter(object):
+class JumpcutterGui(object):
     def __init__(self, main_window: QMainWindow):
         # variables
         self.sourceMode = 1  # file
@@ -134,7 +133,7 @@ class UiJumpcutter(object):
         self.onlyInt = QIntValidator()
         self.onlyInt.setLocale(self.locale)
         self.onlyInt.setBottom(0)
-        self.onlyFloat = QDoubleValidator()
+        self.onlyFloat = QDoubleValidator()  # TODO disallow e and a second .
         self.onlyFloat.setLocale(self.locale)
         self.onlyFloat.setBottom(0.0)
 
@@ -619,12 +618,14 @@ class UiJumpcutter(object):
 
     # invoked by listener
     def run_clicked(self):
+        # TODO Run destination and source checks
         self.runButton.setEnabled(False)
         settings = self.get_settings()
         try:
             jumpcutter.process_settings(settings)
-        except [AssertionError, IOError, TypeError]:
-            create_warning_popup("Something went wrong. Please check the Console for spesifics")
+        except Exception as ex:
+            create_warning_popup(
+                "Something went wrong.\n{}-Error Message:\n{}".format(ex.__class__.__str__(), ex.__str__()))
         self.runButton.setEnabled(True)
 
     # invoked by listener
@@ -658,9 +659,9 @@ class UiJumpcutter(object):
     # invoked by listener
     def destination_selection_clicked(self):
         if self.sourceMode == 1:  # file
-            self.sourceLineEdit.setText(save_file(starting_path=self.sourceLineEdit.text()))
+            self.destinationLineEdit.setText(save_file(starting_path=self.sourceLineEdit.text()))
         elif self.sourceMode == 2:  # folder
-            self.sourceLineEdit.setText(choose_directory(starting_path=self.sourceLineEdit.text()))
+            self.destinationLineEdit.setText(choose_directory(starting_path=self.sourceLineEdit.text()))
 
     def validate_line_edit(self, line_edit: QLineEdit):
         if line_edit.validator().validate(line_edit.text(), 0) is not QValidator.Acceptable:
@@ -703,7 +704,7 @@ def initiate_gui():
     app = QtWidgets.QApplication(sys.argv)
     main_window = QtWidgets.QMainWindow()
     settings = generate_settings()
-    ui = UiJumpcutter(main_window)
+    ui = JumpcutterGui(main_window)
     ui.apply_settings(settings)
     main_window.show()
 
