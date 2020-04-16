@@ -7,6 +7,9 @@ from PyQt5.QtCore import QLocale
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QValidator
 from PyQt5.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QMainWindow
 import jumpcutter
+import ctypes
+from ctypes import windll, wintypes
+from uuid import UUID
 
 GUI_SETTINGS_FILENAME = "gui_settings.json"
 
@@ -34,10 +37,6 @@ GUI_SETTINGS_FILENAME = "gui_settings.json"
 
 def get_download_folder():
     if os.name == 'nt':  # jea.. Windows.. I guess.. wish everything would be as simple as in linux
-        import ctypes
-        from ctypes import windll, wintypes
-        from uuid import UUID
-
         # ctypes GUID copied from MSDN sample code
         class GUID(ctypes.Structure):
             _fields_ = [
