@@ -4,6 +4,8 @@ import math
 import os
 import re
 import subprocess
+import threading
+import time
 from shutil import copyfile, rmtree
 
 import numpy as np
@@ -55,13 +57,13 @@ def get_max_volume(s):
 
 
 def copy_frame(input_frame, output_frame):
-    src = os.path.join(TEMP_FOLDER, "frame{:06d}.jpg".format(input_frame + 1))
+    src = os.path.join(TEMP_FOLDER, "temp", "frame{:06d}.jpg".format(input_frame + 1))
     dst = os.path.join(TEMP_FOLDER, "newFrame{:06d}.jpg".format(output_frame + 1))
     if not os.path.isfile(src):
         return False
     copyfile(src, dst)
-    if output_frame % 100 == 0:
-        print(str(output_frame + 1) + " time-altered frames saved.")
+    if output_frame % 500 == 0:
+        print(str(output_frame) + " time-altered frames saved.")
     return True
 
 
@@ -100,6 +102,17 @@ def count_mp4_files_in_folder(input_path: str):
     return len(glob.glob1(input_path, "*.mp4"))
 
 
+def call_subprocess(command: str, shell: bool = False, stdout: str = None):
+    timer_start = time.time()
+    if stdout is not None:
+        with open(stdout, "w+") as parameter_file:
+            subprocess.call(command, shell=shell, stdout=parameter_file)
+    else:
+        subprocess.call(command, shell=shell)
+    timer_end = time.time() - timer_start
+    print("{}s: {}".format(timer_end, command))
+
+
 def process(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
             sample_rate: float, frame_rate: float, frame_quality: int, input_file: str):
     global TEMP_FOLDER
@@ -109,20 +122,24 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
 
     # smooth out transitiion"s audio by quickly fading in/out (arbitrary magic number whatever)
     audio_fade_envelope_size = 400
+
     create_path(TEMP_FOLDER)
+    create_path(os.path.join(TEMP_FOLDER, "temp"))
+
     command = "ffmpeg -i " + input_file + " -qscale:v " + str(
-        frame_quality) + " " + TEMP_FOLDER + "/frame%06d.jpg -hide_banner"
-    subprocess.call(command, shell=True)
+        frame_quality) + " " + TEMP_FOLDER + "/temp/frame%06d.jpg -hide_banner"
+    picture_seperation_thread = threading.Thread(target=call_subprocess, args=[command])
+    picture_seperation_thread.start()
     command = "ffmpeg -i " + input_file + " -ab 160k -ac 2 -ar " + str(
-        sample_rate) + " -vn " + TEMP_FOLDER + "/audio.wav -hide_banner"
-    subprocess.call(command, shell=True)
+        sample_rate) + " -vn " + TEMP_FOLDER + "/temp/audio.wav -hide_banner"
+    call_subprocess(command, shell=False)
     command = "ffmpeg -i " + TEMP_FOLDER + "/input.mp4 2>&1 -hide_banner"
-    with open(TEMP_FOLDER + "/params.txt", "w") as parameter_file:
-        subprocess.call(command, shell=True, stdout=parameter_file)
-    sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/audio.wav")
+    call_subprocess(command, shell=False, stdout=os.path.join(TEMP_FOLDER, "temp", "params.txt"))
+
+    sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/temp/audio.wav")
     audio_sample_count = audio_data.shape[0]
     max_audio_volume = get_max_volume(audio_data)
-    with open(TEMP_FOLDER + "/params.txt", "r") as parameter_file:
+    with open(TEMP_FOLDER + "/temp/params.txt", "r") as parameter_file:
         lines = parameter_file.readlines()
         for line in lines:
             m = re.search("Stream #.*Video.* ([0-9]*) fps", line)
@@ -131,7 +148,6 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     samples_per_frame = sample_rate / frame_rate
     audio_frame_count: int = int(math.ceil(audio_sample_count / samples_per_frame))
     has_loud_audio = np.zeros(audio_frame_count)
-
     for audio_frame_iterator in range(audio_frame_count):
         start = int(audio_frame_iterator * samples_per_frame)
         end = min(int((audio_frame_iterator + 1) * samples_per_frame), audio_sample_count)
@@ -145,19 +161,23 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         start = int(max(0, audio_frame_iterator - frame_spreadage))
         end = int(min(audio_frame_count, audio_frame_iterator + 1 + frame_spreadage))
         should_include_frame[audio_frame_iterator] = np.max(has_loud_audio[start:end])
-        if audio_frame_iterator >= 1 and should_include_frame[audio_frame_iterator] != should_include_frame[
-            audio_frame_iterator - 1]:  # Did we flip?
+        if audio_frame_iterator >= 1 and \
+                should_include_frame[audio_frame_iterator] != should_include_frame[audio_frame_iterator - 1]:
+            # Did we flip?
             chunks.append([chunks[-1][1], audio_frame_iterator, should_include_frame[audio_frame_iterator - 1]])
     chunks.append([chunks[-1][1], audio_frame_count, should_include_frame[audio_frame_iterator - 1]])
     chunks = chunks[1:]
     output_audio_data = np.zeros((0, audio_data.shape[1]))
     output_pointer = 0
     last_existing_frame = None
+    timer_start = time.time()
+    print("joining picture_seperation_thread")
+    picture_seperation_thread.join()
     for chunk in chunks:
         audio_chunk = audio_data[int(chunk[0] * samples_per_frame):int(chunk[1] * samples_per_frame)]
 
-        s_file = TEMP_FOLDER + "/tempStart.wav"
-        e_file = TEMP_FOLDER + "/tempEnd.wav"
+        s_file = TEMP_FOLDER + "/temp/tempStart.wav"
+        e_file = TEMP_FOLDER + "/temp/tempEnd.wav"
         wavfile.write(s_file, sample_rate, audio_chunk)
         with WavReader(s_file) as reader:
             with WavWriter(e_file, reader.channels, reader.samplerate) as writer:
@@ -190,22 +210,44 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
                 copy_frame(last_existing_frame, outputFrame)
 
         output_pointer = end_pointer
+
+    timer_end = time.time() - timer_start
+    print("Process {} took {} s ".format("chunks", timer_end))
+
+    timerwav = time.time()
+
     wavfile.write(TEMP_FOLDER + "/audioNew.wav", sample_rate, output_audio_data)
     """
     outputFrame = math.ceil(output_pointer/samples_per_frame)
     for endGap in range(outputFrame,audio_frame_count):
         copy_frame(int(audio_sample_count/samples_per_frame)-1,endGap)
     """
+    timer_wav = time.time() - timerwav
+    print("Process {} took {} s ".format("wavfile", timer_wav))
     command = "ffmpeg " \
-              "-r {0} " \
+              "-thread_queue_size {0} " \
+              "-hide_banner " \
+              "-y " \
+              "-framerate {2} " \
               "-i {1}/newFrame%06d.jpg " \
-              "-i {2}/audioNew.wav " \
-              "-strict " \
-              "-2 {3} " \
-              "-hide_banner" \
-        .format(str(frame_rate), TEMP_FOLDER, TEMP_FOLDER, output_file)
+              "-i {1}/audioNew.wav " \
+              "-framerate {2} " \
+              "{3}" \
+        .format(5000, TEMP_FOLDER, str(frame_rate), output_file)
+
+    deletion_thread = threading.Thread(target=delete_path, args=[os.path.join(TEMP_FOLDER, "temp")])
+    deletion_thread.start()
+
+    print("\n$> ", command)
+    timer_cogent = time.time()
+
     subprocess.call(command, shell=True)
+
+    timer_cogent = time.time() - timer_cogent
+    print("Process {} took {} s "
+          "".format("command", timer_cogent))
     delete_path(TEMP_FOLDER)
+    deletion_thread.join()
 
 
 def process_folder(output_dir: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
@@ -217,12 +259,14 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
         return
 
     if number_of_files > 0:
-        print("\nInput-Source is the '%s' - Folder" % input_path)
+        print("\n\nInput-Source is the '%s' - Folder" % input_path)
         print("This Folder has %d .mp4 Files" % number_of_files)
         filecount = 1
         for filename in glob.glob1(input_path, "*.mp4"):
-            print("\n-----------------------------------------"
-                  "\nFile #", filecount)
+            print("\n\n----------------------------------------------------------------------------------"
+                  "\nFile #{}"
+                  "\n\n----------------------------------------------------------------------------------"
+                  .format(filecount))
             filecount += 1
             input_file = os.path.join(input_path, filename)
             output_file = input_to_output_filename(os.path.join(output_dir, filename))
