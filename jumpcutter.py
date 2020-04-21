@@ -55,12 +55,12 @@ def get_max_volume(s):
 
 
 def copy_frame(input_frame, output_frame):
-    src = TEMP_FOLDER + "/frame{:06d}".format(input_frame + 1) + ".jpg"
-    dst = TEMP_FOLDER + "/newFrame{:06d}".format(output_frame + 1) + ".jpg"
+    src = os.path.join(TEMP_FOLDER, "frame{:06d}.jpg".format(input_frame + 1))
+    dst = os.path.join(TEMP_FOLDER, "newFrame{:06d}.jpg".format(output_frame + 1))
     if not os.path.isfile(src):
         return False
     copyfile(src, dst)
-    if output_frame % 20 == 19:
+    if output_frame % 100 == 0:
         print(str(output_frame + 1) + " time-altered frames saved.")
     return True
 
@@ -184,8 +184,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         end_output_frame = int(math.ceil(end_pointer / samples_per_frame))
         for outputFrame in range(start_output_frame, end_output_frame):
             input_frame = int(chunk[0] + new_speed[int(chunk[2])] * (outputFrame - start_output_frame))
-            did_it_work = copy_frame(input_frame, outputFrame)
-            if did_it_work:
+            if copy_frame(input_frame, outputFrame):
                 last_existing_frame = input_frame
             else:
                 copy_frame(last_existing_frame, outputFrame)
@@ -226,7 +225,7 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
                   "\nFile #", filecount)
             filecount += 1
             input_file = os.path.join(input_path, filename)
-            output_file = input_to_output_filename(input_file)
+            output_file = input_to_output_filename(os.path.join(output_dir, filename))
             # we are ignoring here that a max filename exists, because I dont think that people would use it that way
             # and if they do .. WHY
             while os.path.isfile(output_file):
