@@ -1,15 +1,16 @@
+import ctypes
 import json
 import os
 import sys
+from ctypes import windll, wintypes
+from uuid import UUID
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QLocale
 from PyQt5.QtGui import QIntValidator, QDoubleValidator, QValidator
 from PyQt5.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QMainWindow
+
 import jumpcutter
-import ctypes
-from ctypes import windll, wintypes
-from uuid import UUID
 
 GUI_SETTINGS_FILENAME = "gui_settings.json"
 
@@ -618,6 +619,10 @@ class JumpcutterGui(object):
     # invoked by listener
     def run_clicked(self):
         # TODO Run destination and source checks
+        if os.path.isdir(jumpcutter.TEMP_TEMP_FOLDER):
+            jumpcutter.delete_path(jumpcutter.TEMP_TEMP_FOLDER)
+        if os.path.isdir(jumpcutter.TEMP_FOLDER):
+            jumpcutter.delete_path(jumpcutter.TEMP_FOLDER)
         self.runButton.setEnabled(False)
         settings = self.get_settings()
         try:
