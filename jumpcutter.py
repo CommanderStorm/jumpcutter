@@ -167,14 +167,18 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
                 should_include_frame[audio_frame_iterator] != should_include_frame[audio_frame_iterator - 1]:
             # Did we flip?
             chunks.append([chunks[-1][1], audio_frame_iterator, should_include_frame[audio_frame_iterator - 1]])
+
     chunks.append([chunks[-1][1], audio_frame_count, should_include_frame[audio_frame_iterator - 1]])
     chunks = chunks[1:]
+
     output_audio_data = np.zeros((0, audio_data.shape[1]))
     output_pointer = 0
     last_existing_frame = None
-    timer_start = time.time()
+
     print("joining picture_seperation_thread")
     picture_seperation_thread.join()
+
+    timer_start = time.time()
     for chunk in chunks:
         audio_chunk = audio_data[int(chunk[0] * samples_per_frame):int(chunk[1] * samples_per_frame)]
 
