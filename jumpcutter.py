@@ -226,13 +226,11 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
                   "\nFile #", filecount)
             filecount += 1
             input_file = os.path.join(input_path, filename)
-            ouput_filename = filename + "_Altered"
-            output_file = os.path.join(output_dir, ouput_filename)
+            output_file = input_to_output_filename(input_file)
             # we are ignoring here that a max filename exists, because I dont think that people would use it that way
             # and if they do .. WHY
             while os.path.isfile(output_file):
-                output_file += "_Altered"  # TODO
-
+                output_file = input_to_output_filename(output_file)
             process(output_file, silent_threshold, new_speed, frame_spreadage,
                     sample_rate, frame_rate, frame_quality, input_file)
     else:
