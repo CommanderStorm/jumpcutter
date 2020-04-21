@@ -17,6 +17,7 @@ from scipy.io import wavfile
 import jumpcutterGui as Gui
 
 TEMP_FOLDER = "TEMP"
+TEMP_TEMP_FOLDER = os.path.join(TEMP_FOLDER, "temp")
 
 
 #     _____                                                          __      __
@@ -57,7 +58,8 @@ def get_max_volume(s):
 
 
 def copy_frame(input_frame, output_frame):
-    src = os.path.join(TEMP_FOLDER, "temp", "frame{:06d}.jpg".format(input_frame + 1))
+    global TEMP_FOLDER, TEMP_TEMP_FOLDER
+    src = os.path.join(TEMP_TEMP_FOLDER, "frame{:06d}.jpg".format(input_frame + 1))
     dst = os.path.join(TEMP_FOLDER, "newFrame{:06d}.jpg".format(output_frame + 1))
     if not os.path.isfile(src):
         return False
@@ -115,7 +117,7 @@ def call_subprocess(command: str, shell: bool = False, stdout: str = None):
 
 def process(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
             sample_rate: float, frame_rate: float, frame_quality: int, input_file: str):
-    global TEMP_FOLDER
+    global TEMP_FOLDER, TEMP_TEMP_FOLDER
     assert input_file is not None, "why u put no input file, that dum"
     if len(output_file) < 1:
         output_file = input_to_output_filename(input_file)
@@ -124,17 +126,17 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     audio_fade_envelope_size = 400
 
     create_path(TEMP_FOLDER)
-    create_path(os.path.join(TEMP_FOLDER, "temp"))
+    create_path(TEMP_TEMP_FOLDER)
 
-    command = "ffmpeg -i " + input_file + " -qscale:v " + str(
-        frame_quality) + " " + TEMP_FOLDER + "/temp/frame%06d.jpg -hide_banner"
+    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + input_file + " -qscale:v " + str(
+        frame_quality) + " " + TEMP_FOLDER + "/temp/frame%06d.jpg"
     picture_seperation_thread = threading.Thread(target=call_subprocess, args=[command])
     picture_seperation_thread.start()
-    command = "ffmpeg -i " + input_file + " -ab 160k -ac 2 -ar " + str(
-        sample_rate) + " -vn " + TEMP_FOLDER + "/temp/audio.wav -hide_banner"
+    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + input_file + " -ab 160k -ac 2 -ar " + str(
+        sample_rate) + " -vn " + TEMP_FOLDER + "/temp/audio.wav"
     call_subprocess(command, shell=False)
-    command = "ffmpeg -i " + TEMP_FOLDER + "/input.mp4 2>&1 -hide_banner"
-    call_subprocess(command, shell=False, stdout=os.path.join(TEMP_FOLDER, "temp", "params.txt"))
+    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + TEMP_FOLDER + "/input.mp4 2>&1"
+    call_subprocess(command, shell=False, stdout=os.path.join(TEMP_TEMP_FOLDER, "params.txt"))
 
     sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/temp/audio.wav")
     audio_sample_count = audio_data.shape[0]
@@ -226,16 +228,17 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     print("Process {} took {} s ".format("wavfile", timer_wav))
     command = "ffmpeg " \
               "-thread_queue_size {0} " \
-              "-hide_banner " \
+              "-hide_banner -loglevel warning -stats " \
               "-y " \
               "-framerate {2} " \
               "-i {1}/newFrame%06d.jpg " \
+              "-ac 2 " \
               "-i {1}/audioNew.wav " \
               "-framerate {2} " \
               "{3}" \
-        .format(5000, TEMP_FOLDER, str(frame_rate), output_file)
+        .format(6000, TEMP_FOLDER, str(frame_rate), output_file)
 
-    deletion_thread = threading.Thread(target=delete_path, args=[os.path.join(TEMP_FOLDER, "temp")])
+    deletion_thread = threading.Thread(target=delete_path, args=[TEMP_TEMP_FOLDER])
     deletion_thread.start()
 
     print("\n$> ", command)
