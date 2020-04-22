@@ -619,8 +619,6 @@ class JumpcutterGui(object):
     # invoked by listener
     def run_clicked(self):
         # TODO Run destination and source checks
-        if os.path.isdir(jumpcutter.TEMP_TEMP_FOLDER):
-            jumpcutter.delete_path(jumpcutter.TEMP_TEMP_FOLDER)
         if os.path.isdir(jumpcutter.TEMP_FOLDER):
             jumpcutter.delete_path(jumpcutter.TEMP_FOLDER)
         self.runButton.setEnabled(False)
@@ -714,6 +712,8 @@ def initiate_gui():
 
     # app was closed
     exitcode = app.exec_()
+    if os.path.isdir(jumpcutter.TEMP_FOLDER):
+        jumpcutter.delete_path(jumpcutter.TEMP_FOLDER)
     save_gui_settings(ui.get_settings())
     sys.exit(exitcode)
 
