@@ -14,7 +14,7 @@ from audiotsm.io.wav import WavReader, WavWriter
 from pytube import YouTube
 from scipy.io import wavfile
 
-import jumpcutterGui as Gui
+from Gui import jumpcutterGui as Gui
 
 TEMP_FOLDER = "TEMP"
 TEMP_TEMP_FOLDER = os.path.join(TEMP_FOLDER, "temp")
