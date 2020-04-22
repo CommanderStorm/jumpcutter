@@ -672,9 +672,13 @@ class JumpcutterGui(object):
             line_edit.setPalette(self.redPalette)
 
 
-def generate_settings():
-    with open(GUI_SETTINGS_FILENAME, "r") as settings_file:
-        settings = json.load(settings_file)
+def load_settings():
+    try:
+        with open(GUI_SETTINGS_FILENAME, "r") as settings_file:
+            settings = json.load(settings_file)
+    except IOError:
+        save_gui_settings()
+        load_settings()
     if settings["source"] == "":
         settings["source"] = get_download_folder()
     if settings["destination"] == "":
@@ -705,7 +709,7 @@ def initiate_gui():
         save_gui_settings()
     app = QtWidgets.QApplication(sys.argv)
     main_window = QtWidgets.QMainWindow()
-    settings = generate_settings()
+    settings = load_settings()
     ui = JumpcutterGui(main_window)
     ui.apply_settings(settings)
     main_window.show()
