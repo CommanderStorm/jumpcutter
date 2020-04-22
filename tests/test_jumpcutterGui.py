@@ -82,11 +82,7 @@ class GUIHelpers(TestCase):
             json.dump(save, settings_file)
         loaded_settings = J_gui.load_settings()
         self.assertEqual(loaded_settings, expected,
-                         msg=f"the settingsfiles should be indifferent :C\n"
-                             f"loaded:\n"
-                             f"{loaded_settings}\n\n"
-                             f"actual:\n"
-                             f"{expected}")
+                         msg=f"the Settings-Files should be indifferent :(")
 
     def test_load_settings_virgin(self):
         self.json_load_settings_test_helper(self.settings_virgin, self.settings_download)
@@ -94,12 +90,26 @@ class GUIHelpers(TestCase):
     def test_load_settings_tampered(self):
         self.json_load_settings_test_helper(self.settings_tampered, self.settings_tampered)
 
+    def save_gui_settings_helper(self, expected, settings=None):
+        if settings is None:
+            J_gui.save_gui_settings()
+        else:
+            J_gui.save_gui_settings(settings)
+        with open(SETTINGS_FILE, "r") as settings_file:
+            loaded_settings = json.load(settings_file)
+        self.assertEqual(loaded_settings, expected,
+                         msg=f"the Settings-Files should be indifferent :(")
+
+    def test_save_gui_settings_none(self):
+        self.save_gui_settings_helper(self.settings_download)
+
     def test_save_gui_settings(self):
-        # TODO add test
-        pass
+        self.save_gui_settings_helper(self.settings_download, settings=self.settings_download)
+        self.save_gui_settings_helper(self.settings_download, settings=self.settings_download)
+        self.save_gui_settings_helper(self.settings_tampered, settings=self.settings_tampered)
 
 
-class GUI_PopUps(TestCase):
+class GuiPopUps(TestCase):
 
     def test_save_file(self):
         # TODO add test

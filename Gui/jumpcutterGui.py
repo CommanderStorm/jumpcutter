@@ -12,7 +12,9 @@ from PyQt5.QtWidgets import QFileDialog, QLineEdit, QMessageBox, QMainWindow
 
 import jumpcutter
 
-GUI_SETTINGS_FILENAME = "gui_settings.json"
+PROJECT_ROOT = os.path.normpath(os.path.join(__file__, '..', '..'))
+GUI_FOLDER = os.path.join(PROJECT_ROOT, "Gui")
+GUI_SETTINGS_FILENAME = os.path.join(GUI_FOLDER, "gui_settings.json")
 
 
 #  ________  __  __                     ______                         __
@@ -676,9 +678,12 @@ def load_settings():
     try:
         with open(GUI_SETTINGS_FILENAME, "r") as settings_file:
             settings = json.load(settings_file)
-    except IOError:
-        save_gui_settings()
-        load_settings()
+    except IOError as error:
+        if not os.path.isfile(GUI_SETTINGS_FILENAME):
+            save_gui_settings()
+            load_settings()
+        else:
+            raise IOError(f"Settings could not be loaded the Error was:\n {error}")
     if settings["source"] == "":
         settings["source"] = get_download_folder()
     if settings["destination"] == "":

@@ -16,7 +16,8 @@ from scipy.io import wavfile
 
 from Gui import jumpcutterGui as Gui
 
-TEMP_FOLDER = "TEMP"
+PROJECT_ROOT = os.path.normpath(os.path.join(__file__, '..', '..'))
+TEMP_FOLDER = os.path.join(PROJECT_ROOT, "TEMP")
 TEMP_TEMP_FOLDER = os.path.join(TEMP_FOLDER, "temp")
 
 
