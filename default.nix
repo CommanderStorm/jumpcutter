@@ -22,6 +22,7 @@ let
     numpy
     pillow
     audiotsm
+    pytube
     PyQt5
   ]);
   jumpcutter = stdenv.mkDerivation {
