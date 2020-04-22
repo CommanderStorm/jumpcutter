@@ -239,6 +239,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
               "-ac 2 " \
               "-i {1}/audioNew.wav " \
               "-framerate {2} " \
+              "-c:v libx264 -preset fast -crf 28 -pix_fmt yuvj420p" \
               "{3}" \
         .format(6000, TEMP_FOLDER, str(frame_rate), output_file)
 
