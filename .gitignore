@@ -99,3 +99,4 @@ ENV/
 *.iml
 out
 gen
+/tests/gui_settings.json
