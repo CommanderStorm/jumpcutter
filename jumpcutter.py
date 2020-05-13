@@ -72,8 +72,8 @@ def copy_frame(input_frame, output_frame):
 
 
 def input_to_output_filename(filename):
-    dotIndex = filename.rfind(".")
-    return filename[:dotIndex] + "_ALTERED" + filename[dotIndex:]
+    dot_index = filename.rfind(".")
+    return filename[:dot_index] + "_ALTERED" + filename[dot_index:]
 
 
 def create_path(file_path):
