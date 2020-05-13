@@ -114,7 +114,7 @@ def call_subprocess(command: str, shell: bool = False, stdout: str = None):
     else:
         subprocess.call(command, shell=shell)
     timer_end = time.time() - timer_start
-    print("{}s: {}".format(timer_end, command))
+    print(f"{timer_end}s: {command}")
 
 
 def process(output_file: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
@@ -126,24 +126,42 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
 
     # smooth out transitiion"s audio by quickly fading in/out (arbitrary magic number whatever)
     audio_fade_envelope_size = 400
-
+    # path creation
     create_path(TEMP_FOLDER)
     create_path(TEMP_TEMP_FOLDER)
+    # path constants Temp Temp
+    tmp_paramsfile_path = os.path.join(TEMP_TEMP_FOLDER, "params.txt")
+    tmp_audiofile_path = os.path.join(TEMP_TEMP_FOLDER, "audio.wav")
+    tmp_frame_namingpattern = os.path.join(TEMP_TEMP_FOLDER, "frame%06d.jpg")
+    tmp_wav_start_file = os.path.join(TEMP_TEMP_FOLDER, "tempStart.wav")
+    tmp_wav_end_file = os.path.join(TEMP_TEMP_FOLDER, "tempEnd.wav")
+    # path constants Temp
+    tmp_newaudiofile_path = os.path.join(TEMP_FOLDER, 'audioNew.wav')
+    tmp_newframe_namingpattern = os.path.join(TEMP_TEMP_FOLDER, "newFrame%06d.jpg")
 
-    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + input_file + " -qscale:v " + str(
-        frame_quality) + " " + TEMP_FOLDER + "/temp/frame%06d.jpg"
+    command = f'ffmpeg -hide_banner -loglevel warning -stats ' \
+              f'-i "{input_file}" ' \
+              f'-qscale:v {str(frame_quality)} ' \
+              f'"{tmp_frame_namingpattern}"'
     picture_seperation_thread = Process(target=call_subprocess, args=(command,))
     picture_seperation_thread.start()
-    command = "ffmpeg -hide_banner -loglevel warning -i " + input_file + " -ab 160k -ac 2 -ar " + str(
-        sample_rate) + " -vn " + TEMP_FOLDER + "/temp/audio.wav"
-    call_subprocess(command, shell=False)
-    command = "ffmpeg -hide_banner -loglevel warning -i " + TEMP_FOLDER + "/input.mp4 2>&1"
-    call_subprocess(command, shell=False, stdout=os.path.join(TEMP_TEMP_FOLDER, "params.txt"))
 
-    sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/temp/audio.wav")
+    command = f'ffmpeg -hide_banner -loglevel warning ' \
+              f'-i "{input_file}" ' \
+              f'-ab 160k -ac 2 -ar {str(sample_rate)} ' \
+              f'-vn "{tmp_audiofile_path}"'
+
+    call_subprocess(command, shell=False)
+    # todo if input.mp4 is actually necessarily
+    command = f'ffmpeg -hide_banner -loglevel warning ' \
+              f'-i "{os.path.join(TEMP_FOLDER, "input.mp4")}" ' \
+              f'2>&1'
+    call_subprocess(command, shell=False, stdout=tmp_paramsfile_path)
+
+    sample_rate, audio_data = wavfile.read(tmp_audiofile_path)
     audio_sample_count = audio_data.shape[0]
     max_audio_volume = get_max_volume(audio_data)
-    with open(TEMP_FOLDER + "/temp/params.txt", "r") as parameter_file:
+    with open(tmp_paramsfile_path, "r") as parameter_file:
         for line in parameter_file.readlines():
             m = re.search(r"Stream #.*Video.* ([0-9]*) fps", line)
             if m is not None:
@@ -177,28 +195,25 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     output_pointer = 0
     last_existing_frame = None
 
-    print("joining picture_seperation_thread")
+    print("joining picture_separation_thread")
     picture_seperation_thread.join()
 
     timer_start = time.time()
     for chunk in chunks:
         audio_chunk = audio_data[int(chunk[0] * samples_per_frame):int(chunk[1] * samples_per_frame)]
-
-        s_file = TEMP_FOLDER + "/temp/tempStart.wav"
-        e_file = TEMP_FOLDER + "/temp/tempEnd.wav"
-        wavfile.write(s_file, sample_rate, audio_chunk)
-        with WavReader(s_file) as reader:
-            with WavWriter(e_file, reader.channels, reader.samplerate) as writer:
+        wavfile.write(tmp_wav_start_file, sample_rate, audio_chunk)
+        with WavReader(tmp_wav_start_file) as reader:
+            with WavWriter(tmp_wav_end_file, reader.channels, reader.samplerate) as writer:
                 tsm = phasevocoder(reader.channels, speed=new_speed[int(chunk[2])])
                 tsm.run(reader, writer)
-        _, altered_audio_data = wavfile.read(e_file)
+        _, altered_audio_data = wavfile.read(tmp_wav_end_file)
         leng = altered_audio_data.shape[0]
         end_pointer = output_pointer + leng
         output_audio_data = np.concatenate((output_audio_data, altered_audio_data / max_audio_volume))
 
         # output_audio_data[output_pointer:end_pointer] = altered_audio_data/max_audio_volume
 
-        # smooth out transitiion"s audio by quickly fading in/out
+        # smooth out transition's audio by quickly fading in/out
 
         if leng < audio_fade_envelope_size:
             output_audio_data[output_pointer:end_pointer] = 0  # audio is less than 0.01 sec, let"s just remove it.
@@ -220,8 +235,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         output_pointer = end_pointer
 
     timer_end = time.time() - timer_start
-    print("Process {} took {} s ".format("chunks", timer_end))
-
+    print(f"Process chunks took {timer_end} s ")
     timerwav = time.time()
 
     wavfile.write(TEMP_FOLDER + "/audioNew.wav", sample_rate, output_audio_data)
@@ -231,19 +245,12 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         copy_frame(int(audio_sample_count/samples_per_frame)-1,endGap)
     """
     timer_wav = time.time() - timerwav
-    print("Process {} took {} s ".format("wavfile", timer_wav))
-    command = "ffmpeg " \
-              "-thread_queue_size {0} " \
-              "-hide_banner -loglevel warning -stats " \
-              "-y " \
-              "-framerate {2} " \
-              "-i {1}/newFrame%06d.jpg " \
-              "-ac 2 " \
-              "-i {1}/audioNew.wav " \
-              "-framerate {2} " \
-              "-c:v libx264 -preset fast -crf 28 -pix_fmt yuvj420p" \
-              "{3}" \
-        .format(6000, TEMP_FOLDER, str(frame_rate), output_file)
+    print(f"Process wavfile took {timer_wav} s ")
+    command = f"ffmpeg -thread_queue_size {6000} -hide_banner -loglevel warning -stats -y " \
+              f"-framerate {str(frame_rate)} " \
+              f"-i {tmp_newframe_namingpattern} -ac 2 -i {tmp_newaudiofile_path} -framerate {str(frame_rate)} " \
+              f"-c:v libx264 -preset fast -crf 28 -pix_fmt yuvj420p " \
+              f"{output_file}"
 
     deletion_thread = Process(target=delete_path, args=(TEMP_TEMP_FOLDER,))
     deletion_thread.start()
@@ -254,8 +261,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     subprocess.call(command, shell=True)
 
     timer_cogent = time.time() - timer_cogent
-    print("Process {} took {} s "
-          "".format("command", timer_cogent))
+    print(f"Process command took {timer_cogent} s ")
     deletion_thread.join()
     delete_path(TEMP_FOLDER)
 
@@ -273,10 +279,9 @@ def process_folder(output_dir: str, silent_threshold: float, new_speed: list, fr
         print("This Folder has %d .mp4 Files" % number_of_files)
         filecount = 1
         for filename in glob.glob1(input_path, "*.mp4"):
-            print("\n\n----------------------------------------------------------------------------------"
-                  "\nFile #{}"
-                  "\n\n----------------------------------------------------------------------------------"
-                  .format(filecount))
+            print(f"\n\n----------------------------------------------------------------------------------"
+                  f"\nFile #{filecount}"
+                  f"\n\n----------------------------------------------------------------------------------")
             filecount += 1
             input_file = os.path.join(input_path, filename)
             output_file = input_to_output_filename(os.path.join(output_dir, filename))
@@ -302,19 +307,19 @@ def process_settings(settings: dict):
     new_speed = [settings["silent_speed"], settings["sounded_speed"]]
 
     if combobox == 0:  # ytdownload
-        process_yt("{}".format(settings["destination"]), settings["silent_threshold"], new_speed,
+        process_yt(f"{settings['destination']}", settings["silent_threshold"], new_speed,
                    settings["frame_margin"], settings["sample_rate"], settings["frame_rate"], settings["frame_quality"],
-                   "{}".format(settings["source"]))
+                   f"{settings['source']}")
 
     elif combobox == 1:  # folder conversion
-        process_folder("{}".format(settings["destination"]), settings["silent_threshold"], new_speed,
+        process_folder(f"{settings['destination']}", settings["silent_threshold"], new_speed,
                        settings["frame_margin"], settings["sample_rate"], settings["frame_rate"],
-                       settings["frame_quality"], "{}".format(settings["source"]))
+                       settings["frame_quality"], f"{settings['source']}")
 
     else:  # file conversion
-        process("{}".format(settings["destination"]), settings["silent_threshold"], new_speed, settings["frame_margin"],
+        process(f"{settings['destination']}", settings["silent_threshold"], new_speed, settings["frame_margin"],
                 settings["sample_rate"], settings["frame_rate"], settings["frame_quality"],
-                "{}".format(settings["source"]))
+                f"{settings['source']}")
 
 
 #   ______                                                                   __  __  __
