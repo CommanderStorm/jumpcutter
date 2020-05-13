@@ -4,8 +4,8 @@ import math
 import os
 import re
 import subprocess
-import threading
 import time
+from multiprocessing import Process
 from shutil import copyfile, rmtree
 
 import numpy as np
@@ -60,6 +60,7 @@ def get_max_volume(s):
 
 def copy_frame(input_frame, output_frame):
     global TEMP_FOLDER, TEMP_TEMP_FOLDER
+    # todo is +1 correct?
     src = os.path.join(TEMP_TEMP_FOLDER, "frame{:06d}.jpg".format(input_frame + 1))
     dst = os.path.join(TEMP_FOLDER, "newFrame{:06d}.jpg".format(output_frame + 1))
     if not os.path.isfile(src):
@@ -131,23 +132,23 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
 
     command = "ffmpeg -hide_banner -loglevel warning -stats -i " + input_file + " -qscale:v " + str(
         frame_quality) + " " + TEMP_FOLDER + "/temp/frame%06d.jpg"
-    picture_seperation_thread = threading.Thread(target=call_subprocess, args=[command])
+    picture_seperation_thread = Process(target=call_subprocess, args=(command,))
     picture_seperation_thread.start()
-    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + input_file + " -ab 160k -ac 2 -ar " + str(
+    command = "ffmpeg -hide_banner -loglevel warning -i " + input_file + " -ab 160k -ac 2 -ar " + str(
         sample_rate) + " -vn " + TEMP_FOLDER + "/temp/audio.wav"
     call_subprocess(command, shell=False)
-    command = "ffmpeg -hide_banner -loglevel warning -stats -i " + TEMP_FOLDER + "/input.mp4 2>&1"
+    command = "ffmpeg -hide_banner -loglevel warning -i " + TEMP_FOLDER + "/input.mp4 2>&1"
     call_subprocess(command, shell=False, stdout=os.path.join(TEMP_TEMP_FOLDER, "params.txt"))
 
     sample_rate, audio_data = wavfile.read(TEMP_FOLDER + "/temp/audio.wav")
     audio_sample_count = audio_data.shape[0]
     max_audio_volume = get_max_volume(audio_data)
     with open(TEMP_FOLDER + "/temp/params.txt", "r") as parameter_file:
-        lines = parameter_file.readlines()
-        for line in lines:
-            m = re.search("Stream #.*Video.* ([0-9]*) fps", line)
+        for line in parameter_file.readlines():
+            m = re.search(r"Stream #.*Video.* ([0-9]*) fps", line)
             if m is not None:
                 frame_rate = float(m.group(1))
+                # todo break for here?
     samples_per_frame = sample_rate / frame_rate
     audio_frame_count: int = int(math.ceil(audio_sample_count / samples_per_frame))
     has_loud_audio = np.zeros(audio_frame_count)
@@ -244,7 +245,7 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
               "{3}" \
         .format(6000, TEMP_FOLDER, str(frame_rate), output_file)
 
-    deletion_thread = threading.Thread(target=delete_path, args=[TEMP_TEMP_FOLDER])
+    deletion_thread = Process(target=delete_path, args=(TEMP_TEMP_FOLDER,))
     deletion_thread.start()
 
     print("\n$> ", command)
@@ -255,8 +256,8 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     timer_cogent = time.time() - timer_cogent
     print("Process {} took {} s "
           "".format("command", timer_cogent))
-    delete_path(TEMP_FOLDER)
     deletion_thread.join()
+    delete_path(TEMP_FOLDER)
 
 
 def process_folder(output_dir: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
