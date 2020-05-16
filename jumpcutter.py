@@ -138,23 +138,11 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     # path constants Temp
     tmp_newaudiofile_path = os.path.join(TEMP_FOLDER, 'audioNew.wav')
     tmp_newframe_namingpattern = os.path.join(TEMP_TEMP_FOLDER, "newFrame%06d.jpg")
-
-    command = f'ffmpeg -hide_banner -loglevel warning -stats ' \
-              f'-i "{input_file}" ' \
-              f'-qscale:v {str(frame_quality)} ' \
-              f'"{tmp_frame_namingpattern}"'
-    picture_seperation_thread = Process(target=call_subprocess, args=(command,))
-    picture_seperation_thread.start()
-
-    command = f'ffmpeg -hide_banner -loglevel warning ' \
-              f'-i "{input_file}" ' \
-              f'-ab 160k -ac 2 -ar {str(sample_rate)} ' \
-              f'-vn "{tmp_audiofile_path}"'
-    call_subprocess(command, shell=False)
-    sample_rate, audio_data = wavfile.read(tmp_audiofile_path)
-    audio_sample_count = audio_data.shape[0]
-    max_audio_volume = get_max_volume(audio_data)
-    # todo if input.mp4 is actually necessarily
+    LOG.critical(f"------------START OF JUMPCUT [{input_file}]--------------")
+    picture_seperation_process = generate_picture_separation_process(frame_quality, input_file, tmp_frame_namingpattern)
+    LOG.warning("picture_seperation_process was started")
+    audio_data, audio_sample_count, max_audio_volume, sample_rate = generate_audioinfo(input_file, sample_rate,
+                                                                                       tmp_audiofile_path)
 
     frame_rate = infer_framerate(frame_rate, tmp_paramsfile_path)
 
@@ -168,11 +156,9 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     output_audio_data = np.zeros((0, audio_data.shape[1]))
     output_pointer = 0
     last_existing_frame = None
-
-    print("joining picture_separation_thread")
-    picture_seperation_thread.join()
-
-    timer_start = time.time()
+    LOG.warning("waiting on picture_seperation_process")
+    picture_seperation_process.join()
+    LOG.warning("picture_seperation_process joined with main process")
     for chunk in chunks:
         audio_chunk = audio_data[int(chunk[0] * samples_per_frame):int(chunk[1] * samples_per_frame)]
         wavfile.write(tmp_wav_start_file, sample_rate, audio_chunk)
@@ -240,7 +226,39 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     print(f"Process command took {timer_cogent} s ")
     deletion_thread.join()
     delete_path(TEMP_FOLDER)
-    LOG.warning(f"end of deletion")
+    LOG.critical(f"end of jumpcut")
+
+
+def combine_video_audio(frame_rate, output_file, tmp_newaudiofile_path, tmp_newframe_namingpattern):
+    command = f"ffmpeg -thread_queue_size {6000} -hide_banner -loglevel warning -stats -y " \
+              f"-framerate {str(frame_rate)} " \
+              f"-i {tmp_newframe_namingpattern} -ac 2 -i {tmp_newaudiofile_path} -framerate {str(frame_rate)} " \
+              f"-c:v libx264 -preset fast -crf 28 -pix_fmt yuvj420p " \
+              f"{output_file}"
+    subprocess.call(command, shell=True)
+
+
+def generate_audioinfo(input_file, sample_rate, tmp_audiofile_path):
+    # todo if input.mp4 is actually necessarily
+    command = f'ffmpeg -hide_banner -loglevel warning ' \
+              f'-i "{input_file}" ' \
+              f'-ab 160k -ac 2 -ar {str(sample_rate)} ' \
+              f'-vn "{tmp_audiofile_path}"'
+    call_subprocess(command, shell=False)
+    sample_rate, audio_data = wavfile.read(tmp_audiofile_path)
+    audio_sample_count = audio_data.shape[0]
+    max_audio_volume = get_max_volume(audio_data)
+    return audio_data, audio_sample_count, max_audio_volume, sample_rate
+
+
+def generate_picture_separation_process(frame_quality, input_file, tmp_frame_namingpattern):
+    command = f'ffmpeg -hide_banner -loglevel warning -stats ' \
+              f'-i "{input_file}" ' \
+              f'-qscale:v {str(frame_quality)} ' \
+              f'"{tmp_frame_namingpattern}"'
+    picture_seperation_thread = Process(target=call_subprocess, args=(command,))
+    picture_seperation_thread.start()
+    return picture_seperation_thread
 
 
 def generate_has_loud_audio(audio_frame_count, audio_data, audio_sample_count, max_audio_volume,
