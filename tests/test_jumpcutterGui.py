@@ -1,14 +1,19 @@
 import json
 import os
-from unittest import TestCase
+from unittest import TestCase, skip
 
 import Gui.jumpcutterGui as J_gui
 
 # constants
+
+
 PROJECT_ROOT = os.path.normpath(os.path.join(__file__, '..', '..'))
 DOWNLOAD_FOLDER = r"C:\Users\frank\Downloads"
 GUI_FOLDER = os.path.join(PROJECT_ROOT, "Gui")
 SETTINGS_FILE = os.path.join(GUI_FOLDER, "gui_settings.json")
+TESTS_FOLDER = os.path.join(PROJECT_ROOT, "tests")
+FOOTAGE_FOLDER = os.path.join(TESTS_FOLDER, "Footage")
+SELECT_ME_FILE = os.path.join(FOOTAGE_FOLDER, "select_me.txt")
 
 if not os.path.isdir(PROJECT_ROOT):
     raise RuntimeError(f"Specify the actual PROJECT_ROOT using the file manager {PROJECT_ROOT} does not exist.")
@@ -111,21 +116,35 @@ class GUIHelpers(TestCase):
 
 class GuiPopUps(TestCase):
 
+    @skip("gui tests apparrently are really anoying")
     def test_save_file(self):
-        # TODO add test
-        pass
+        # todo debug, why these things dont Pop-Up
+        self.assertEqual(PROJECT_ROOT, J_gui.save_file(PROJECT_ROOT, "save Nothing"),
+                         msg="you should have saved Nothing")
+        self.assertEqual(SELECT_ME_FILE, J_gui.save_file(FOOTAGE_FOLDER, f"save {SELECT_ME_FILE}"),
+                         msg=f"you should have chosen {SELECT_ME_FILE}")
 
+    @skip("gui tests apparrently are really anoying")
     def test_choose_file(self):
-        # TODO add test
-        pass
+        # todo debug, why these things dont Pop-Up
+        self.assertEqual(PROJECT_ROOT, J_gui.choose_file(PROJECT_ROOT, "select Nothing"),
+                         msg="you should have chosen Nothing")
+        self.assertEqual(SELECT_ME_FILE, J_gui.choose_file(FOOTAGE_FOLDER, f"select {SELECT_ME_FILE}"),
+                         msg=f"you should have chosen {SELECT_ME_FILE}")
 
+    @skip("gui tests apparrently are really anoying")
     def test_choose_directory(self):
-        # TODO add test
-        pass
+        # todo debug, why these things dont Pop-Up
+        self.assertEqual(PROJECT_ROOT, J_gui.choose_directory(PROJECT_ROOT, "select Nothing"),
+                         msg="you should have chosen Nothing")
+        self.assertEqual(FOOTAGE_FOLDER, J_gui.choose_directory(TESTS_FOLDER, f"select {FOOTAGE_FOLDER}"),
+                         msg=f"you should have chosen {FOOTAGE_FOLDER}")
 
+    @skip("gui tests apparrently are really anoying to implement")
     def test_create_warning_popup(self):
-        # TODO add test
-        pass
+        # todo debug, why these things dont Pop-Up
+        J_gui.create_warning_popup("Intended Popup")
+        self.assertEqual(input("did a popup show up? (y/n)").lower(), "y")
 
 
 class GUI_Hardcore(TestCase):
