@@ -1,10 +1,10 @@
 import argparse
 import glob
+import logging
 import math
 import os
 import re
 import subprocess
-import time
 from multiprocessing import Process
 from shutil import copyfile, rmtree
 
@@ -150,46 +150,20 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
               f'-i "{input_file}" ' \
               f'-ab 160k -ac 2 -ar {str(sample_rate)} ' \
               f'-vn "{tmp_audiofile_path}"'
-
     call_subprocess(command, shell=False)
-    # todo if input.mp4 is actually necessarily
-    command = f'ffmpeg -hide_banner -loglevel warning ' \
-              f'-i "{os.path.join(TEMP_FOLDER, "input.mp4")}" ' \
-              f'2>&1'
-    call_subprocess(command, shell=False, stdout=tmp_paramsfile_path)
-
     sample_rate, audio_data = wavfile.read(tmp_audiofile_path)
     audio_sample_count = audio_data.shape[0]
     max_audio_volume = get_max_volume(audio_data)
-    with open(tmp_paramsfile_path, "r") as parameter_file:
-        for line in parameter_file.readlines():
-            m = re.search(r"Stream #.*Video.* ([0-9]*) fps", line)
-            if m is not None:
-                frame_rate = float(m.group(1))
-                # todo break for here?
+    # todo if input.mp4 is actually necessarily
+
+    frame_rate = infer_framerate(frame_rate, tmp_paramsfile_path)
+
     samples_per_frame = sample_rate / frame_rate
     audio_frame_count: int = int(math.ceil(audio_sample_count / samples_per_frame))
-    has_loud_audio = np.zeros(audio_frame_count)
-    for audio_frame_iterator in range(audio_frame_count):
-        start = int(audio_frame_iterator * samples_per_frame)
-        end = min(int((audio_frame_iterator + 1) * samples_per_frame), audio_sample_count)
-        audiochunks = audio_data[start:end]
-        maxchunks_volume = float(get_max_volume(audiochunks)) / max_audio_volume
-        if maxchunks_volume >= silent_threshold:
-            has_loud_audio[audio_frame_iterator] = 1
-    chunks = [[0, 0, 0]]
-    should_include_frame = np.zeros(audio_frame_count)
-    for audio_frame_iterator in range(audio_frame_count):
-        start = int(max(0, audio_frame_iterator - frame_spreadage))
-        end = int(min(audio_frame_count, audio_frame_iterator + 1 + frame_spreadage))
-        should_include_frame[audio_frame_iterator] = np.max(has_loud_audio[start:end])
-        if audio_frame_iterator >= 1 and \
-                should_include_frame[audio_frame_iterator] != should_include_frame[audio_frame_iterator - 1]:
-            # Did we flip?
-            chunks.append([chunks[-1][1], audio_frame_iterator, should_include_frame[audio_frame_iterator - 1]])
 
-    chunks.append([chunks[-1][1], audio_frame_count, should_include_frame[audio_frame_iterator - 1]])
-    chunks = chunks[1:]
+    has_loud_audio = generate_has_loud_audio(audio_frame_count, audio_data, audio_sample_count, max_audio_volume,
+                                             samples_per_frame, silent_threshold)
+    chunks = generate_chunks(audio_frame_count, frame_spreadage, has_loud_audio)
 
     output_audio_data = np.zeros((0, audio_data.shape[1]))
     output_pointer = 0
@@ -210,6 +184,8 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
         leng = altered_audio_data.shape[0]
         end_pointer = output_pointer + leng
         output_audio_data = np.concatenate((output_audio_data, altered_audio_data / max_audio_volume))
+
+        # todo unpack previous for into chunk.id,output_pointer,leng,end_pointer,output_audio_data
 
         # output_audio_data[output_pointer:end_pointer] = altered_audio_data/max_audio_volume
 
@@ -264,6 +240,52 @@ def process(output_file: str, silent_threshold: float, new_speed: list, frame_sp
     print(f"Process command took {timer_cogent} s ")
     deletion_thread.join()
     delete_path(TEMP_FOLDER)
+    LOG.warning(f"end of deletion")
+
+
+def generate_has_loud_audio(audio_frame_count, audio_data, audio_sample_count, max_audio_volume,
+                            samples_per_frame, silent_threshold):
+    has_loud_audio = np.zeros(audio_frame_count)
+    for audio_frame_iterator in range(audio_frame_count):
+        start = int(audio_frame_iterator * samples_per_frame)
+        end = min(int((audio_frame_iterator + 1) * samples_per_frame), audio_sample_count)
+        audiochunks = audio_data[start:end]
+        maxchunks_volume = float(get_max_volume(audiochunks)) / max_audio_volume
+        if maxchunks_volume >= silent_threshold:
+            has_loud_audio[audio_frame_iterator] = 1
+    return has_loud_audio
+
+
+def infer_framerate(frame_rate, tmp_paramsfile_path):
+    global TEMP_FOLDER
+
+    command = f'ffmpeg -hide_banner -loglevel warning ' \
+              f'-i "{os.path.join(TEMP_FOLDER, "input.mp4")}" ' \
+              f'2>&1'
+    call_subprocess(command, shell=False, stdout=tmp_paramsfile_path)
+    with open(tmp_paramsfile_path, "r") as parameter_file:
+        for line in parameter_file.readlines():
+            m = re.search(r"Stream #.*Video.* ([0-9]*) fps", line)
+            if m is not None:
+                frame_rate = float(m.group(1))
+                # todo break for here?
+    return frame_rate
+
+
+def generate_chunks(audio_frame_count, frame_spreadage, has_loud_audio):
+    should_include_frame = np.zeros(audio_frame_count)
+    chunks = [[0, 0, 0]]
+    for audio_frame_iterator in range(audio_frame_count):
+        start = int(max(0, audio_frame_iterator - frame_spreadage))
+        end = int(min(audio_frame_count, audio_frame_iterator + 1 + frame_spreadage))
+        should_include_frame[audio_frame_iterator] = np.max(has_loud_audio[start:end])
+        if audio_frame_iterator >= 1 and \
+                should_include_frame[audio_frame_iterator] != should_include_frame[audio_frame_iterator - 1]:
+            # Did we flip?
+            chunks.append([chunks[-1][1], audio_frame_iterator, should_include_frame[audio_frame_iterator - 1]])
+    chunks.append([chunks[-1][1], audio_frame_count, should_include_frame[audio_frame_iterator - 1]])
+    chunks = chunks[1:]
+    return chunks
 
 
 def process_folder(output_dir: str, silent_threshold: float, new_speed: list, frame_spreadage: int,
