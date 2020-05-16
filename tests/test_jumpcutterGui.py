@@ -1,6 +1,6 @@
 import json
 import os
-from unittest import TestCase, skip
+from unittest import TestCase, skip, expectedFailure
 
 import Gui.jumpcutterGui as J_gui
 
@@ -147,11 +147,9 @@ class GuiPopUps(TestCase):
         self.assertEqual(input("did a popup show up? (y/n)").lower(), "y")
 
 
-class GUI_Hardcore(TestCase):
-    def test_initiate_gui(self):
-        # TODO add test
-        pass
+class GuiHardcore(TestCase):
 
-    def test_jumpcutter_gui(self):
-        # TODO add test
-        pass
+    @skip("gui tests apparrently are really anoying to use")
+    @expectedFailure()
+    def test_initiate_gui(self):
+        J_gui.initiate_gui()
